@@ -11,59 +11,72 @@ class Program:
         Main(self.canvas)
         win.mainloop()
 
+
 class Main:
     def __init__(self, canvas):
-        self.buttons_bind = None
-        self.buttons_action_bind = None
-        self.buttons_basic = [tkinter.PhotoImage(file=f"textures/buttons/basic/{i}.png") for i in range(0, 4)]  # [LOAD/SETTINGS/RESET/QUIT 0/1/2/3]
-        self.buttons_filled = [tkinter.PhotoImage(file=f"textures/buttons/filled/{i}.png") for i in range(0, 4)]
-
         self.canvas = canvas
-        self.buttons_ID = []
 
-        self.buttons()
-        self.buttons_bind = self.canvas.tag_bind("button", "<Motion>", self.filled_button)
-        self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
+        self.buttonsBasicImages = self.createDictionaryForImages("textures/buttons/basic/", ["settings", "load", "reset", "close"])
+        self.buttonsFilledImages = self.createDictionaryForImages("textures/buttons/filled/", ["settings", "load", "reset", "close"])
+        self.planetsImages = self.createDictionaryForImages("textures/planets/", ["earth", "jupiter", "mars", "mercury", "neptune", "saturn", "uranus", "venus"])
+        self.transportUnitsImages = self.createDictionaryForImages("textures/transportunits/", ["rocket", "ufo"])
+        self.buttonsId = {}
 
-    def buttons(self):
-        x = 90
-        for number in range(4):
-            self.buttons_ID.append(
-                self.canvas.create_image(x, 40, image=self.buttons_basic[number], tag="button"))
+        self.createButtons()
+        self.buttonsBind = self.canvas.tag_bind("button", "<Motion>", self.filledButton)
+        self.buttonsActionBind = self.canvas.tag_bind("button", "<Button-1>", self.buttonsAction)
+
+    def createDictionaryForImages(self, path, imagelist):
+        images = {}
+
+        for item in imagelist:
+            images[item] = tkinter.PhotoImage(file=f"{path}{item}.png")
+
+        return images
+
+    def createButtons(self):
+        x = 120
+        for buttonName in self.buttonsBasicImages.keys():
+            self.buttonsId[buttonName] = self.canvas.create_image(x, 30, image=self.buttonsBasicImages[buttonName], tag="button")
             x += 250
         self.canvas.update()
 
-    def filled_button(self, event):
-        for number in range(4):
-            if self.canvas.coords(self.buttons_ID[number]) == self.canvas.coords("current"):
-                self.canvas.itemconfig("current", image=self.buttons_filled[number])
+    def filledButton(self, event):
+        for buttonsName in self.buttonsFilledImages.keys():
+            if self.canvas.coords(self.buttonsId[buttonsName]) == self.canvas.coords("current"):
+                self.canvas.itemconfig("current", image=self.buttonsFilledImages[buttonsName])
             else:
-                self.canvas.itemconfig(self.buttons_ID[number], image=self.buttons_basic[number])
+                self.canvas.itemconfig(self.buttonsId[buttonsName], image=self.buttonsBasicImages[buttonsName])
 
-    def buttons_action(self, event):
-        if self.canvas.coords("current") == self.canvas.coords(self.buttons_ID[0]):
+    def buttonsAction(self, event):
+        if self.canvas.coords("current") == self.canvas.coords(self.buttonsId["load"]):
             self.clean_main_menu()
             Game(self.canvas)
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_ID[1]):
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttonsId["settings"]):
             Settings(self.canvas)
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_ID[2]):
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttonsId["reset"]):
             self.clean_main_menu()
             self.reset()
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_ID[3]):
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttonsId["close"]):
             quit()
 
     def clean_main_menu(self):
         self.canvas.delete("all")
-        self.canvas.unbind("<Motion>", self.buttons_bind)
-        self.canvas.unbind("<Button-1>", self.buttons_action_bind)
+        self.canvas.unbind("<Motion>", self.buttonsBind)
+        self.canvas.unbind("<Button-1>", self.buttonsActionBind)
 
     def reset(self):
         self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
         Main(self.canvas)
+
+
+class Game:
+    def __init__(self, canvas):
+        self.canvas = canvas
 
 
 class Settings:
@@ -74,8 +87,6 @@ class Settings:
         self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
         Main(self.canvas)
-
-
 
 
 Program()
