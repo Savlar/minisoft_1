@@ -1,27 +1,36 @@
 import tkinter
 
+from PIL import ImageTk, Image
+
+from graph import Graph
+
 
 class Program:
     def __init__(self):
         win = tkinter.Tk()
-        self.canvas = tkinter.Canvas(height=800, width=1360)
-        self.canvas.configure(background="grey")
+        self.canvas = tkinter.Canvas(height=1080, width=1920, bg='grey')
         self.canvas.pack()
 
         Main(self.canvas)
         win.mainloop()
 
+
 class Main:
     def __init__(self, canvas):
         self.canvas = canvas
+        self.canvas.transport_types = []
+        self.canvas.transport_types.append(ImageTk.PhotoImage(Image.open('textures/transportunits/rocket.png').resize((40, 40))))
+        self.canvas.transport_types.append(ImageTk.PhotoImage(Image.open('textures/transportunits/ufo.png').resize((40, 40))))
 
-        self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/", ["settings", "load", "reset", "close"])
-        self.buttons_filled_images = self.create_dictionary_for_images("textures/buttons/filled/", ["settings", "load", "reset", "close"])
-        self.planets_images = self.create_dictionary_for_images("textures/planets/", ["earth", "jupiter", "mars", "mercury", "neptune", "saturn", "uranus", "venus"])
+        self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
+                                                                      ["settings", "load", "reset", "close"])
+        self.buttons_filled_images = self.create_dictionary_for_images("textures/buttons/filled/",
+                                                                       ["settings", "load", "reset", "close"])
+        self.planets_images = self.create_dictionary_for_images("textures/planets/",
+                                                                ["earth", "jupiter", "mars", "mercury", "neptune",
+                                                                 "saturn", "uranus", "venus"])
         self.transport_units_images = self.create_dictionary_for_images("textures/transportunits/", ["rocket", "ufo"])
         self.buttons_id = {}
-
-        #self.canvas.create_arc(50, 50, 400, 400, style=tkinter.ARC, width=10, start=180)
 
         self.create_buttons()
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
@@ -29,23 +38,24 @@ class Main:
 
         self.create_rectangles()
         Game(self.canvas, self.transport_units_images)
+        self.graph = Graph(self.canvas)
 
     def create_dictionary_for_images(self, path, image_list):
         images = {}
 
         for item in image_list:
             images[item] = tkinter.PhotoImage(file=f"{path}{item}.png")
-
         return images
 
     def create_rectangles(self):
-        self.canvas.create_rectangle(10, 80, 1120, 580)
-        self.canvas.create_rectangle(1140, 80, 1350, 580)
+        self.canvas.create_rectangle(10, 80, 1650, 850)
+        self.canvas.create_rectangle(1660, 80, 1870, 1050)
 
     def create_buttons(self):
         x = 120
         for buttonName in self.buttons_basic_images.keys():
-            self.buttons_id[buttonName] = self.canvas.create_image(x, 30, image=self.buttons_basic_images[buttonName], tag="button")
+            self.buttons_id[buttonName] = self.canvas.create_image(x, 30, image=self.buttons_basic_images[buttonName],
+                                                                   tag="button")
             x += 250
         self.canvas.update()
 
@@ -88,7 +98,7 @@ class Game:
         self.transport_units = transport_units
         self.transport_units_objects = []
         self.results_transport_units = []
-        self.place_for_results_transport_units = self.canvas.create_rectangle(10, 600, 1120, 750, tag="units_place")
+        self.place_for_results_transport_units = self.canvas.create_rectangle(10, 870, 1120, 1060, tag="units_place")
         self.results_rectangle_coords = self.canvas.coords(self.place_for_results_transport_units)
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
@@ -101,7 +111,11 @@ class Game:
         if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
             kind = "rocket"
 
-        self.results_transport_units.append(self.canvas.create_image(80 + len(self.results_transport_units) * 100, 680,image=(self.transport_units["rocket"] if kind == "rocket" else self.transport_units["ufo"]), tag="results_clickable"))
+        self.results_transport_units.append(self.canvas.create_image(80 + len(self.results_transport_units) * 100, 940,
+                                                                     image=(self.transport_units[
+                                                                                "rocket"] if kind == "rocket" else
+                                                                            self.transport_units["ufo"]),
+                                                                     tag="results_clickable"))
 
     def clean_transport_units_objects(self):
         for objc in self.transport_units_objects:
@@ -109,8 +123,10 @@ class Game:
         self.transport_units_objects = []
 
     def create_transport_units(self):
-        self.transport_units_objects.append(self.canvas.create_image(1240, 630, image=self.transport_units["rocket"], tag="movable"))
-        self.transport_units_objects.append( self.canvas.create_image(1250, 700, image=self.transport_units["ufo"], tag="movable"))
+        self.transport_units_objects.append(
+            self.canvas.create_image(1240, 900, image=self.transport_units["rocket"], tag="movable"))
+        self.transport_units_objects.append(
+            self.canvas.create_image(1250, 970, image=self.transport_units["ufo"], tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()
@@ -123,13 +139,17 @@ class Game:
         current_coords = [event.x, event.y]
         kind = "ufo"
 
-        print(self.transport_units_objects[0])
         if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
             kind = "rocket"
 
-        if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= current_coords[0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
-            0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[1] - 150:
-            self.results_transport_units.append(self.canvas.create_image(80+len(self.results_transport_units)*100, 680, image=(self.transport_units["rocket"] if kind == "rocket" else self.transport_units["ufo"]), tag="results_clickable"))
+        if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= current_coords[
+            0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
+            0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[
+            1] - 150:
+            self.results_transport_units.append(
+                self.canvas.create_image(80 + len(self.results_transport_units) * 100, 1200, image=(
+                    self.transport_units["rocket"] if kind == "rocket" else self.transport_units["ufo"]),
+                                         tag="results_clickable"))
         self.remake_transport_units_objects()
 
 
@@ -141,6 +161,3 @@ class Settings:
         self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
         Main(self.canvas)
-
-
-Program()
