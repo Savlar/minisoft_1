@@ -4,14 +4,14 @@ from PIL import ImageTk, Image
 
 from editor import TaskEditor
 from graph import Graph
-from serialize import save_data, load_data
+from serialize import load_data
 from task_description import TaskDescription
 
 
 class Program:
     def __init__(self):
         win = tkinter.Tk()
-        self.canvas = tkinter.Canvas(height=1080, width=1920, bg='grey')
+        self.canvas = tkinter.Canvas(master=win, height=1080, width=1920, bg='grey')
         self.canvas.pack()
 
         Main(self.canvas)
@@ -42,8 +42,7 @@ class Main:
         self.create_rectangles()
 
         Game(self.canvas, self.transport_units_images)
-        self.canvas.images = {}
-
+        self.canvas.images = {'diskette': ImageTk.PhotoImage(Image.open(f'textures/diskette.png').resize((50, 50)))}
         for planet in ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']:
             image = ImageTk.PhotoImage(Image.open(f'textures/planets/{planet}.png').
                                        resize((50, 50)))
@@ -51,6 +50,7 @@ class Main:
         self.te = None
         self.graph = Graph(self.canvas)
         x = load_data()
+        # typ ulohy 1-5
         self.task_type = x[2]['type']
         self.graph.load(x)
         self.task = TaskDescription(self.canvas, x[2])
@@ -85,7 +85,7 @@ class Main:
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             # self.clean_main_menu()
             # Game(self.canvas)
-            self.graph.delete_all_edges()
+            self.graph.delete_all()
             self.te = TaskEditor(self.canvas)
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["settings"]):
@@ -96,9 +96,6 @@ class Main:
             self.reset()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
-            if self.te is not None:
-                markers = list(self.te.vertex_markers.keys())
-                save_data(self.te.edges, self.te.vertices, {'type': 1, 'path': [markers[0], markers[1]]})
             quit()
 
     def clean_main_menu(self):

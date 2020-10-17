@@ -1,11 +1,14 @@
 import tkinter
 from graph import Graph
+from serialize import save_data
 
 
 class TaskEditor(Graph):
 
-    def __init__(self, canvas):
+    def __init__(self, canvas: tkinter.Canvas):
         super(TaskEditor, self).__init__(canvas)
+        self.saved = False
+        self.canvas.create_image(50, 110, image=self.canvas.images['diskette'])
         self.canvas.bind('<Button-1>', self.start_drawing)
         self.canvas.bind('<B1-Motion>', self.mouse_drag)
         self.canvas.bind('<ButtonRelease-1>', self.end_drawing)
@@ -14,6 +17,11 @@ class TaskEditor(Graph):
         self.canvas.bind('<Button-3>', self.mark_vertex)
 
     def start_drawing(self, e):
+        if self.clicked_save(e.x, e.y):
+            self.saved = True
+            markers = list(self.vertex_markers.keys())
+            save_data('data', self.edges, self.vertices, {'type': 1, 'path': [markers[0], markers[1]]})
+            return
         for edge in self.edges:
             if edge.image.clicked(e.x, e.y):
                 x, y = edge.image.image_coords
@@ -70,7 +78,18 @@ class TaskEditor(Graph):
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
                 try:
-                    self.delete_items(self.vertex_markers[vertex])
+                    self.delete_items(self.vertex_markers[vertex][0])
+                    self.delete_items(self.vertex_markers[vertex][1])
+                    deleted_order = self.vertex_markers[vertex][2]
+                    for marker in self.vertex_markers.values():
+                        if marker[2] > deleted_order:
+                            marker[2] = marker[2] - 1
+                            self.canvas.itemconfig(marker[1], text=marker[2])
                     self.vertex_markers.pop(vertex)
                 except KeyError:
-                    self.create_marker(vertex)
+                    order = len(self.vertex_markers.keys())
+                    self.create_marker(vertex, order + 1, True)
+
+    @staticmethod
+    def clicked_save(x, y):
+        return 25 <= x <= 75 and 85 <= y <= 135

@@ -1,8 +1,8 @@
 import pickle
 
 
-def save_data(edges, vertices, options):
-    with open('data.pickle', 'wb') as output:
+def save_data(filename, edges, vertices, options):
+    with open(filename + '.pickle', 'wb') as output:
         pickle.dump([edges, vertices, options], output)
 
 

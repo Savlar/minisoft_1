@@ -6,7 +6,7 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas):
+    def __init__(self, canvas: tkinter.Canvas):
         self.canvas = canvas
         self.image_size = 50
         self.vertex_markers = {}
@@ -66,17 +66,19 @@ class Graph:
         copy_points.append(e.y)
         return copy_points
 
-    def create_marker(self, vertex):
+    def create_marker(self, vertex, order, mark=False):
         radius = self.image_size // 2
-        self.vertex_markers[vertex] = self.canvas.create_oval(vertex.x - radius, vertex.y - radius,
-                                                              vertex.x + radius, vertex.y + radius, width=3,
-                                                              outline='red')
+        text = self.canvas.create_text(vertex.x, vertex.y, text=order, fill='red', font=('Arial', 14, 'bold')) if mark else None
+        self.vertex_markers[vertex] = [self.canvas.create_oval(vertex.x - radius, vertex.y - radius,
+                                                               vertex.x + radius, vertex.y + radius, width=3,
+                                                               outline='red'), text, order]
 
     def mark_vertex(self, e):
-        self.canvas.delete(*self.vertex_markers.values())
+        marker_id = list(x[0] for x in self.vertex_markers.values())
+        self.canvas.delete(marker_id)
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
-                self.create_marker(vertex)
+                self.create_marker(vertex, 1)
                 return
 
     def load(self, data):
@@ -88,6 +90,9 @@ class Graph:
         for item in to_delete:
             self.canvas.delete(item)
 
-    def delete_all_edges(self):
+    def delete_all(self):
+        for marker in self.vertex_markers.values():
+            self.delete_items(marker[0])
+            self.delete_items(marker[1])
         for edge in self.edges:
             self.delete_items(*edge.delete_edge())
