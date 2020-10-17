@@ -83,15 +83,21 @@ class Main:
 
     def buttonsAction(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
+            if self.te is not None:
+                self.te.close()
             # self.clean_main_menu()
             # Game(self.canvas)
             self.graph.delete_all()
             self.te = TaskEditor(self.canvas)
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["settings"]):
+            if self.te is not None:
+                self.te.close()
             Settings(self.canvas)
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
+            if self.te is not None:
+                self.te.close()
             self.clean_main_menu()
             self.reset()
 

@@ -47,7 +47,7 @@ class Graph:
                     self.edges.append(Edge(vertex, neighbour))
 
     def find_edge(self, x1, y1, x2, y2):
-        area = self.image_size + 50
+        area = 35
         for edge in self.edges:
             if edge.connected_nodes(x1, y1, x2, y2, area):
                 return edge

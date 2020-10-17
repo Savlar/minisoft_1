@@ -28,8 +28,7 @@ class TaskEditor(Graph):
                 t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
                 self.delete_items(edge.image.image)
                 edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y), t)
-                self.points = []
-                return
+                break
         self.points = [e.x, e.y]
 
     def cancel_drawing(self, e):
@@ -93,3 +92,11 @@ class TaskEditor(Graph):
     @staticmethod
     def clicked_save(x, y):
         return 25 <= x <= 75 and 85 <= y <= 135
+
+    def close(self):
+        self.canvas.unbind('<Button-1>')
+        self.canvas.unbind('<B1-Motion>')
+        self.canvas.unbind('<ButtonRelease-1>')
+        self.canvas.unbind('<Button-3>')
+        self.canvas.unbind('<Button-2>')
+        self.canvas.unbind('<Button-3>')
