@@ -13,15 +13,15 @@ class Graph:
         self.points = []
         self.edges = []
         self.vertices = []
-        self.line = None
         self.create_vertices()
         self.create_edges()
         self.draw_planets()
         self.canvas.bind('<Button-3>', self.mark_vertex)
+        self.offset_last_point = 5
 
     def draw_planets(self):
         for vertex in self.vertices:
-            self.canvas.create_image(vertex.x, vertex.y, image=self.canvas.images[vertex.name])
+            self.canvas.create_image(vertex.x, vertex.y, image=self.canvas.images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
         coords = [(800, 150), (500, 300), (1100, 300), (200, 450), (1400, 450), (500, 600), (1100, 600), (800, 750)]
@@ -59,7 +59,10 @@ class Graph:
         except IndexError:
             return []
         for i in range(2, len(self.points), 2):
-            if random.random() < 0.02:
+            if (e.x > self.points[i] + self.offset_last_point or e.x < self.points[i] - self.offset_last_point) and (e.y > self.points[i + 1] + self.offset_last_point or e.y < self.points[i + 1] - self.offset_last_point):
+                print("pass")
+                pass
+            if random.random() < 0.20:
                 copy_points.append(self.points[i])
                 copy_points.append(self.points[i + 1])
         copy_points.append(e.x)

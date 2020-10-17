@@ -9,12 +9,23 @@ class TaskEditor(Graph):
         super(TaskEditor, self).__init__(canvas)
         self.saved = False
         self.canvas.create_image(50, 110, image=self.canvas.images['diskette'])
-        self.canvas.bind('<Button-1>', self.start_drawing)
-        self.canvas.bind('<B1-Motion>', self.mouse_drag)
-        self.canvas.bind('<ButtonRelease-1>', self.end_drawing)
-        self.canvas.bind('<Button-3>', self.cancel_drawing)
+        self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
+        self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
+        self.canvas.tag_bind("draw_ground", '<ButtonRelease-1>', self.end_drawing)
+        self.canvas.tag_bind("change_transport_unit", '<Button-1>', self.change_transport_unit)
         self.canvas.bind('<Button-2>', self.delete_edge)
-        self.canvas.bind('<Button-3>', self.mark_vertex)
+        self.canvas.tag_bind("draw_ground", '<Button-3>', self.mark_vertex)
+        self.line = None
+
+    def change_transport_unit(self, e):
+        for edge in self.edges:
+            if edge.image.clicked(e.x, e.y):
+                x, y = edge.image.image_coords
+                t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
+                self.delete_items(edge.image.image)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t], tag="change_transport_unit"), (x, y),
+                                          t)
+                break
 
     def start_drawing(self, e):
         if self.clicked_save(e.x, e.y):
@@ -22,19 +33,7 @@ class TaskEditor(Graph):
             markers = list(self.vertex_markers.keys())
             save_data('data', self.edges, self.vertices, {'type': 1, 'path': [markers[0], markers[1]]})
             return
-        for edge in self.edges:
-            if edge.image.clicked(e.x, e.y):
-                x, y = edge.image.image_coords
-                t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
-                self.delete_items(edge.image.image)
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y), t)
-                break
         self.points = [e.x, e.y]
-
-    def cancel_drawing(self, e):
-        self.points = []
-        self.canvas.delete(self.line)
-        self.line = None
 
     def delete_edge(self, e):
         for edge in self.edges:
@@ -43,6 +42,7 @@ class TaskEditor(Graph):
                 return
 
     def mouse_drag(self, e):
+        print(e)
         self.points.append(e.x)
         self.points.append(e.y)
         if self.line is None:
@@ -71,7 +71,7 @@ class TaskEditor(Graph):
         if middle % 2 == 1:
             middle -= 1
         x, y = coords[middle], coords[middle + 1]
-        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[0]), (x, y), 0)
+        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[0], tag="change_transport_unit"), (x, y), 0, )
 
     def mark_vertex(self, e):
         for vertex in self.vertices:
