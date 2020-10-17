@@ -2,7 +2,10 @@ import tkinter
 
 from PIL import ImageTk, Image
 
+from editor import TaskEditor
 from graph import Graph
+from serialize import save_data, load_data
+from task_description import TaskDescription
 
 
 class Program:
@@ -37,8 +40,20 @@ class Main:
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttonsAction)
 
         self.create_rectangles()
+
         Game(self.canvas, self.transport_units_images)
+        self.canvas.images = {}
+
+        for planet in ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']:
+            image = ImageTk.PhotoImage(Image.open(f'textures/planets/{planet}.png').
+                                       resize((50, 50)))
+            self.canvas.images[planet] = image
+        self.te = None
         self.graph = Graph(self.canvas)
+        x = load_data()
+        self.task_type = x[2]['type']
+        self.graph.load(x)
+        self.task = TaskDescription(self.canvas, x[2])
 
     def create_dictionary_for_images(self, path, image_list):
         images = {}
@@ -68,8 +83,10 @@ class Main:
 
     def buttonsAction(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
-            self.clean_main_menu()
-            Game(self.canvas)
+            # self.clean_main_menu()
+            # Game(self.canvas)
+            self.graph.delete_all_edges()
+            self.te = TaskEditor(self.canvas)
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["settings"]):
             Settings(self.canvas)
@@ -79,6 +96,9 @@ class Main:
             self.reset()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
+            if self.te is not None:
+                markers = list(self.te.vertex_markers.keys())
+                save_data(self.te.edges, self.te.vertices, {'type': 1, 'path': [markers[0], markers[1]]})
             quit()
 
     def clean_main_menu(self):

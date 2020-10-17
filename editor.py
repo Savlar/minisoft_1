@@ -11,13 +11,14 @@ class TaskEditor(Graph):
         self.canvas.bind('<ButtonRelease-1>', self.end_drawing)
         self.canvas.bind('<Button-3>', self.cancel_drawing)
         self.canvas.bind('<Button-2>', self.delete_edge)
+        self.canvas.bind('<Button-3>', self.mark_vertex)
 
     def start_drawing(self, e):
         for edge in self.edges:
             if edge.image.clicked(e.x, e.y):
                 x, y = edge.image.image_coords
                 t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
-                self.delete_items([edge.image.image])
+                self.delete_items(edge.image.image)
                 edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y), t)
                 self.points = []
                 return
@@ -31,7 +32,7 @@ class TaskEditor(Graph):
     def delete_edge(self, e):
         for edge in self.edges:
             if edge.clicked_edge(e.x, e.y):
-                self.delete_items(edge.delete_edge())
+                self.delete_items(*edge.delete_edge())
                 return
 
     def mouse_drag(self, e):
@@ -51,7 +52,7 @@ class TaskEditor(Graph):
                 self.line = self.canvas.create_line(*copy_points, width=3, smooth=True, splinesteps=3,
                                                     arrow=tkinter.LAST)
                 if edge.line is not None:
-                    self.delete_items(edge.delete_edge())
+                    self.delete_items(*edge.delete_edge())
                 edge.line = self.line
                 edge.points = copy_points[:]
                 self.transport_selection(edge)
@@ -65,6 +66,11 @@ class TaskEditor(Graph):
         x, y = coords[middle], coords[middle + 1]
         edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[0]), (x, y), 0)
 
-    def delete_items(self, to_delete):
-        for item in to_delete:
-            self.canvas.delete(item)
+    def mark_vertex(self, e):
+        for vertex in self.vertices:
+            if vertex.clicked(e.x, e.y):
+                try:
+                    self.delete_items(self.vertex_markers[vertex])
+                    self.vertex_markers.pop(vertex)
+                except KeyError:
+                    self.create_marker(vertex)

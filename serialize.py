@@ -1,9 +1,9 @@
 import pickle
 
 
-def save_data(edges, vertices):
+def save_data(edges, vertices, options):
     with open('data.pickle', 'wb') as output:
-        pickle.dump([edges, vertices], output)
+        pickle.dump([edges, vertices, options], output)
 
 
 def load_data():

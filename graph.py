@@ -1,9 +1,6 @@
 import random
 import tkinter
-from PIL import ImageTk, Image
-
 from edge import Edge
-from serialize import load_data
 from vertex import Vertex
 
 
@@ -12,22 +9,19 @@ class Graph:
     def __init__(self, canvas):
         self.canvas = canvas
         self.image_size = 50
+        self.vertex_markers = {}
         self.points = []
         self.edges = []
         self.vertices = []
         self.line = None
         self.create_vertices()
         self.create_edges()
-        self.draw_edges()
         self.draw_planets()
+        self.canvas.bind('<Button-3>', self.mark_vertex)
 
     def draw_planets(self):
-        self.canvas.images = []
         for vertex in self.vertices:
-            image = ImageTk.PhotoImage(Image.open(f'textures/planets/{vertex.name}.png').
-                                       resize((self.image_size, self.image_size)))
-            self.canvas.images.append(image)
-            self.canvas.create_image(vertex.x, vertex.y, image=self.canvas.images[-1])
+            self.canvas.create_image(vertex.x, vertex.y, image=self.canvas.images[vertex.name])
 
     def create_vertices(self):
         coords = [(800, 150), (500, 300), (1100, 300), (200, 450), (1400, 450), (500, 600), (1100, 600), (800, 750)]
@@ -37,12 +31,14 @@ class Graph:
 
     def draw_edges(self):
         for edge in self.edges:
-            if edge.points is not None:
-                self.canvas.create_line(*edge.points, width=3, smooth=True, splinesteps=3, arrow=tkinter.LAST)
+            if edge.points is not None and len(edge.points) > 0:
+                edge.line = self.canvas.create_line(*edge.points, width=3, smooth=True, splinesteps=3,
+                                                    arrow=tkinter.LAST, arrowshape=(16, 20, 6))
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y), t)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y),
+                                          t)
 
     def create_edges(self):
         for vertex in self.vertices:
@@ -70,9 +66,28 @@ class Graph:
         copy_points.append(e.y)
         return copy_points
 
-    def load(self):
-        x = load_data()
-        self.edges = x[0]
-        self.vertices = x[1]
-        self.draw_planets()
+    def create_marker(self, vertex):
+        radius = self.image_size // 2
+        self.vertex_markers[vertex] = self.canvas.create_oval(vertex.x - radius, vertex.y - radius,
+                                                              vertex.x + radius, vertex.y + radius, width=3,
+                                                              outline='red')
+
+    def mark_vertex(self, e):
+        self.canvas.delete(*self.vertex_markers.values())
+        for vertex in self.vertices:
+            if vertex.clicked(e.x, e.y):
+                self.create_marker(vertex)
+                return
+
+    def load(self, data):
+        self.edges = data[0]
+        self.vertices = data[1]
         self.draw_edges()
+
+    def delete_items(self, *to_delete):
+        for item in to_delete:
+            self.canvas.delete(item)
+
+    def delete_all_edges(self):
+        for edge in self.edges:
+            self.delete_items(*edge.delete_edge())
