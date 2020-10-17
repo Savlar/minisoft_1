@@ -45,3 +45,6 @@ class Edge:
         self.line = None
         self.points = []
         return img, line
+
+    def is_edge(self):
+        return self.line is not None
