@@ -5,16 +5,16 @@ from serialize import save_data
 
 class TaskEditor(Graph):
 
-    def __init__(self, canvas: tkinter.Canvas):
-        super(TaskEditor, self).__init__(canvas)
+    def __init__(self, canvas, planets_images, transport_images):
+        super(TaskEditor, self).__init__(canvas, planets_images, transport_images)
         self.saved = False
-        self.canvas.create_image(50, 110, image=self.canvas.images['diskette'])
         self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
         self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
         self.canvas.tag_bind("draw_ground", '<ButtonRelease-1>', self.end_drawing)
         self.canvas.tag_bind("change_transport_unit", '<Button-1>', self.change_transport_unit)
         self.canvas.bind('<Button-2>', self.delete_edge)
         self.canvas.tag_bind("draw_ground", '<Button-3>', self.mark_vertex)
+
         self.line = None
 
     def change_transport_unit(self, e):
@@ -23,7 +23,7 @@ class TaskEditor(Graph):
                 x, y = edge.image.image_coords
                 t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
                 self.delete_items(edge.image.image)
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t], tag="change_transport_unit"), (x, y),
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[t], tag="change_transport_unit"), (x, y),
                                           t)
                 break
 
@@ -71,7 +71,7 @@ class TaskEditor(Graph):
         if middle % 2 == 1:
             middle -= 1
         x, y = coords[middle], coords[middle + 1]
-        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[0], tag="change_transport_unit"), (x, y), 0, )
+        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[0], tag="change_transport_unit"), (x, y), 0, )
 
     def mark_vertex(self, e):
         for vertex in self.vertices:

@@ -21,7 +21,7 @@ class Program:
 class Main:
     def __init__(self, canvas):
         self.canvas = canvas
-        self.buttons_array_names = ["settings", "load", "reset", "close", "check"]
+        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
@@ -32,7 +32,6 @@ class Main:
                                                                  "saturn", "uranus", "venus"])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/", ["rocket", "ufo", "rocket_small", "ufo_small"])
 
-        self.diskette = {'diskette': ImageTk.PhotoImage(Image.open(f'textures/diskette.png').resize((50, 50)))}
         self.buttons_id = {}
 
         self.create_buttons()
@@ -49,7 +48,7 @@ class Main:
         # typ ulohy 1-5
         self.task_type = x[2]['type']
         self.graph.load(x)
-        self.task = TaskDescription(self.canvas, x[2], self.diskette, self.planets_images)
+        self.task = TaskDescription(self.canvas, x[2], self.planets_images)
 
     def create_dictionary_for_images(self, path, image_list):
         images = {}
@@ -65,7 +64,7 @@ class Main:
     def create_buttons(self):
         x = 120
         for buttonName in self.buttons_basic_images.keys():
-            if buttonName != "check":
+            if buttonName != "check" and buttonName != "save":
                 self.buttons_id[buttonName] = self.canvas.create_image(x, 30,
                                                                        image=self.buttons_basic_images[buttonName],
                                                                        tag="button")
@@ -74,8 +73,12 @@ class Main:
                                                             tag="button")
         self.canvas.update()
 
+    def create_save_button(self):
+        self.buttons_id["save"] = self.canvas.create_image(1250, 30, image=self.buttons_basic_images["save"],
+                                                            tag="button")
+
     def filled_button(self, event):
-        for buttonsName in self.buttons_filled_images.keys():
+        for buttonsName in self.buttons_id.keys():
             if self.canvas.coords(self.buttons_id[buttonsName]) == self.canvas.coords("current"):
                 self.canvas.itemconfig("current", image=self.buttons_filled_images[buttonsName])
             else:
@@ -85,10 +88,9 @@ class Main:
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             if self.te is not None:
                 self.te.close()
-            # self.clean_main_menu()
-            # Game(self.canvas)
             self.graph.delete_all()
-            self.te = TaskEditor(self.canvas)
+            self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
+            self.create_save_button()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["settings"]):
             if self.te is not None:
