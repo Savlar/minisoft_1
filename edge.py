@@ -23,8 +23,11 @@ class Edge:
         self.end = end
         self.points = points
         self.line = line
-        self.weigh = []
+        self.weight = []
         self.image = TransportImage()
+
+    def get_transport_type(self):
+        return self.image.img_type
 
     def connected_nodes(self, x1, y1, x2, y2, area):
         return self.start.x - area <= x1 <= self.start.x + area and self.start.y - area <= y1 <= self.start.y + area \
@@ -48,3 +51,6 @@ class Edge:
 
     def is_edge(self):
         return self.line is not None
+
+    def get_edge_stats(self):
+        return self.start.name, self.end.name, self.get_transport_type()

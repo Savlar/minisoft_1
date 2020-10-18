@@ -1,7 +1,5 @@
 import tkinter
 
-from PIL import ImageTk, Image
-
 from editor import TaskEditor
 from graph import Graph
 from serialize import load_data
@@ -30,20 +28,21 @@ class Main:
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus"])
-        self.transport_images = self.create_dictionary_for_images("textures/transportunits/", ["rocket", "ufo", "rocket_small", "ufo_small"])
+        self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
+                                                                  ["rocket", "ufo", "rocket_small", "ufo_small"])
 
         self.buttons_id = {}
 
         self.create_buttons()
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
-        self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttonsAction)
+        self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
 
         self.create_rectangles()
 
-        Game(self.canvas, self.transport_images)
+        self.game = Game(self.canvas, self.transport_images)
 
         self.te = None
-        self.graph = Graph(self.canvas, self.planets_images, self.transport_images)
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, 'venus')
         x = load_data()
         # typ ulohy 1-5
         self.task_type = x[2]['type']
@@ -75,7 +74,7 @@ class Main:
 
     def create_save_button(self):
         self.buttons_id["save"] = self.canvas.create_image(1250, 30, image=self.buttons_basic_images["save"],
-                                                            tag="button")
+                                                           tag="button")
 
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
@@ -84,7 +83,7 @@ class Main:
             else:
                 self.canvas.itemconfig(self.buttons_id[buttonsName], image=self.buttons_basic_images[buttonsName])
 
-    def buttonsAction(self, event):
+    def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             if self.te is not None:
                 self.te.close()
@@ -105,6 +104,70 @@ class Main:
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
             quit()
+
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
+            self.check_path()
+
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["save"]):
+            self.save_map()
+
+    def check_path(self):
+        final_needed_path = self.task.get_path()
+
+        if len(final_needed_path) == 0:
+            raise Exception("Data structure is wrong. At least one planet should be chosen to visit.")
+
+        start_planet = self.graph.get_start_planet()
+        results_transport_units = self.get_results_transport_units()
+
+        if len(final_needed_path) == 1 and final_needed_path[0] == start_planet and len(results_transport_units) == 0:
+            print("Your path is correct")
+            return
+
+        if len(results_transport_units) == 0:
+            print("No transport units were used")
+            return
+
+        possible_paths = []
+        edges = self.graph.edges
+
+        def backtracking(current_planet, current_transport_unit_index, current_result):
+            current_result.append(current_planet)
+
+            if current_transport_unit_index >= len(results_transport_units):
+                possible_paths.append(current_result)
+                return
+
+            for edge in edges:
+                if edge.is_edge():
+                    edge_stats = edge.get_edge_stats()
+                    if current_planet == edge_stats[0]:
+                        if results_transport_units[current_transport_unit_index] == edge_stats[2]:
+                            backtracking(edge_stats[1], current_transport_unit_index+1, current_result)
+                        #v pripade ak z danej planety sa danym prostriedkom uz nikam inde nevieme dostat, tak vlastne je to spravne riesenie, pretoze ostaneme na dobrej planete
+                        else:
+                            possible_paths.append(current_result)
+                            return
+
+        backtracking(start_planet.name,0,[])
+
+        final_needed_path_string = "".join(final_needed_path)
+        for possible_path in possible_paths:
+            if "".join(possible_path) == final_needed_path_string:
+                print("You found out good path")
+                return
+
+        print("Your solution is not correct. Please try again")
+
+    def get_results_transport_units(self):
+        list_transport_units = []
+        for transport_unit in self.game.results_transport_units:
+            list_transport_units.append(transport_unit[0])
+
+        return list_transport_units
+
+    def save_map(self):
+        pass
 
     def clean_main_menu(self):
         self.canvas.delete("all")
@@ -129,23 +192,46 @@ class Game:
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
         self.click_units = self.canvas.tag_bind("movable", "<Button-1>", self.add_transport_unit_on_click)
+        self.click_units = self.canvas.tag_bind("results_clickable", "<Button-1>", self.remove_transport_unit_on_click)
         self.create_transport_units()
         self.canvas.update()
+
+    def remove_transport_unit_on_click(self, event):
+        current = self.canvas.find_withtag("current")[0]
+        for transport_unit in self.results_transport_units:
+            if current == transport_unit[1]:
+                self.canvas.delete(transport_unit[1])
+                self.results_transport_units.remove(transport_unit)
+
+        self.remake_results_transport_units_objects()
+
+    def remake_results_transport_units_objects(self):
+        old_transport_units = self.results_transport_units
+        self.results_transport_units = []
+        for old_transport_unit in old_transport_units:
+            self.append_to_results_transport_unit(old_transport_unit[0])
+            self.canvas.delete(old_transport_unit[1])
 
     def add_transport_unit_on_click(self, event):
         if len(self.results_transport_units) == self.max_results_transport_units:
             return
 
-        kind = "ufo"
+        # ufo
+        kind = 1
 
         if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-            kind = "rocket"
+            #rocket
+            kind = 0
 
-        self.results_transport_units.append(self.canvas.create_image(80 + len(self.results_transport_units) * 100, 960,
-                                                                     image=(self.transport_units[
-                                                                                "rocket"] if kind == "rocket" else
-                                                                            self.transport_units["ufo"]),
-                                                                     tag="results_clickable"))
+        self.append_to_results_transport_unit(kind)
+
+    def append_to_results_transport_unit(self, kind):
+        self.results_transport_units.append(
+            (kind, self.canvas.create_image(80 + len(self.results_transport_units) * 100, 960,
+                                            image=(self.transport_units[
+                                                       "rocket"] if kind == 0 else
+                                                   self.transport_units["ufo"]),
+                                            tag="results_clickable")))
 
     def clean_transport_units_objects(self):
         for objc in self.transport_units_objects:
@@ -168,20 +254,22 @@ class Game:
     def release_transport_unit(self, event):
         if len(self.results_transport_units) != self.max_results_transport_units:
             current_coords = [event.x, event.y]
-            kind = "ufo"
+            kind = 1
 
             if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-                kind = "rocket"
+                kind = 0
 
             if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= \
                     current_coords[
                         0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
                 0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[
                 1] - 150:
-                self.results_transport_units.append(
-                    self.canvas.create_image(80 + len(self.results_transport_units) * 100, 960, image=(
-                        self.transport_units["rocket"] if kind == "rocket" else self.transport_units["ufo"]),
-                                             tag="results_clickable"))
+                self.results_transport_units.append((kind,
+                                                     self.canvas.create_image(
+                                                         80 + len(self.results_transport_units) * 100, 960, image=(
+                                                             self.transport_units["rocket"] if kind == 0 else
+                                                             self.transport_units["ufo"]),
+                                                         tag="results_clickable")))
         self.remake_transport_units_objects()
 
 

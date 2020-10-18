@@ -6,13 +6,15 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, start_planet_name):
         self.canvas = canvas
-        self.image_size = 50
+        self.image_size = 60
         self.vertex_markers = {}
         self.points = []
         self.edges = []
         self.vertices = []
+        self.start_planet_name = start_planet_name
+        self.start_planet_vertex = None
         self.planets_images = planets_images
         self.transport_images = transport_images
         self.create_vertices()
@@ -21,8 +23,13 @@ class Graph:
         self.canvas.bind('<Button-3>', self.mark_vertex)
         self.offset_last_point = 5
 
+    def get_start_planet(self):
+        return self.start_planet_vertex
+
     def draw_planets(self):
         for vertex in self.vertices:
+            if vertex.name == self.start_planet_name:
+                self.start_planet_vertex = vertex
             self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):

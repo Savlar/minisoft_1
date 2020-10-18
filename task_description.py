@@ -15,6 +15,12 @@ class TaskDescription:
         write_task = {1: self.write_task_1, 2: self.write_task_2, 3: self.write_task_3, 4: self.write_task_4}
         write_task[self.task_info['type']]()
 
+    def get_path(self):
+        planets = []
+        for vertex in self.task_info['path']:
+            planets.append(vertex.name)
+        return planets
+
     def write_task_1(self):
         self.canvas.create_text(1765, 100, text='Chces sa dostat z ')
         self.canvas.create_image(1765, 150, image=self.planets_images[self.task_info['path'][0].name])
