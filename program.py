@@ -21,11 +21,6 @@ class Program:
 class Main:
     def __init__(self, canvas):
         self.canvas = canvas
-        self.canvas.transport_types = []
-        self.canvas.transport_types.append(
-            ImageTk.PhotoImage(Image.open('textures/transportunits/rocket.png').resize((40, 40))))
-        self.canvas.transport_types.append(
-            ImageTk.PhotoImage(Image.open('textures/transportunits/ufo.png').resize((40, 40))))
         self.buttons_array_names = ["settings", "load", "reset", "close", "check"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
@@ -35,7 +30,9 @@ class Main:
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus"])
-        self.transport_units_images = self.create_dictionary_for_images("textures/transportunits/", ["rocket", "ufo"])
+        self.transport_images = self.create_dictionary_for_images("textures/transportunits/", ["rocket", "ufo", "rocket_small", "ufo_small"])
+
+        self.diskette = {'diskette': ImageTk.PhotoImage(Image.open(f'textures/diskette.png').resize((50, 50)))}
         self.buttons_id = {}
 
         self.create_buttons()
@@ -44,19 +41,15 @@ class Main:
 
         self.create_rectangles()
 
-        Game(self.canvas, self.transport_units_images)
-        self.canvas.images = {'diskette': ImageTk.PhotoImage(Image.open(f'textures/diskette.png').resize((50, 50)))}
-        for planet in ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']:
-            image = ImageTk.PhotoImage(Image.open(f'textures/planets/{planet}.png').
-                                       resize((50, 50)))
-            self.canvas.images[planet] = image
+        Game(self.canvas, self.transport_images)
+
         self.te = None
-        self.graph = Graph(self.canvas)
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images)
         x = load_data()
         # typ ulohy 1-5
         self.task_type = x[2]['type']
         self.graph.load(x)
-        self.task = TaskDescription(self.canvas, x[2])
+        self.task = TaskDescription(self.canvas, x[2], self.diskette, self.planets_images)
 
     def create_dictionary_for_images(self, path, image_list):
         images = {}

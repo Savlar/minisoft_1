@@ -6,13 +6,15 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images):
         self.canvas = canvas
         self.image_size = 50
         self.vertex_markers = {}
         self.points = []
         self.edges = []
         self.vertices = []
+        self.planets_images = planets_images
+        self.transport_images = transport_images
         self.create_vertices()
         self.create_edges()
         self.draw_planets()
@@ -21,7 +23,7 @@ class Graph:
 
     def draw_planets(self):
         for vertex in self.vertices:
-            self.canvas.create_image(vertex.x, vertex.y, image=self.canvas.images[vertex.name], tag="draw_ground")
+            self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
         coords = [(800, 150), (500, 300), (1100, 300), (200, 450), (1400, 450), (500, 600), (1100, 600), (800, 750)]
@@ -37,8 +39,7 @@ class Graph:
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.canvas.transport_types[t]), (x, y),
-                                          t)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['ufo_small' if t == 1 else 'rocket_small']), (x, y), t)
 
     def create_edges(self):
         for vertex in self.vertices:
