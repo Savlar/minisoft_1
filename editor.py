@@ -24,8 +24,8 @@ class TaskEditor(Graph):
                 x, y = edge.image.image_coords
                 t = edge.image.img_type + 1 if edge.image.img_type < 1 else 0
                 self.delete_items(edge.image.image)
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['ufo_small' if t == 1 else 'rocket_small'], tag="change_transport_unit"), (x, y),
-                                          t)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[
+                    'ufo_small' if t == 1 else 'rocket_small'], tag="change_transport_unit"), (x, y), t)
                 break
 
     def save(self):
@@ -54,8 +54,8 @@ class TaskEditor(Graph):
         if len(copy_points) > 4:
             edge = self.find_edge(copy_points[0], copy_points[-1])
             if edge is not None:
-                self.line = self.canvas.create_line(list(itertools.chain(*copy_points)), width=3, smooth=True, splinesteps=3,
-                                                    arrow=tkinter.LAST)
+                self.line = self.canvas.create_line(list(itertools.chain(*copy_points)), width=3, smooth=True,
+                                                    splinesteps=3, arrow=tkinter.LAST)
                 if edge.line is not None:
                     self.delete_items(*edge.delete_edge())
                 edge.line = self.line
@@ -69,7 +69,8 @@ class TaskEditor(Graph):
         if middle % 2 == 1:
             middle -= 1
         x, y = coords[middle], coords[middle + 1]
-        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['rocket_small'], tag="change_transport_unit"), (x, y), 0)
+        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['rocket_small'],
+                                                           tag="change_transport_unit"), (x, y), 0)
 
     def simplify_line(self, e):
         try:

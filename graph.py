@@ -39,7 +39,8 @@ class Graph:
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['ufo_small' if t == 1 else 'rocket_small']), (x, y), t)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[
+                    'ufo_small' if t == 1 else 'rocket_small']), (x, y), t)
 
     def create_edges(self):
         for vertex in self.vertices:
@@ -56,7 +57,8 @@ class Graph:
 
     def create_marker(self, vertex, order, mark=False):
         radius = self.image_size // 2
-        text = self.canvas.create_text(vertex.x, vertex.y, text=order, fill='red', font=('Arial', 14, 'bold')) if mark else None
+        text = self.canvas.create_text(vertex.x, vertex.y, text=order, fill='red',
+                                       font=('Arial', 14, 'bold')) if mark else None
         self.vertex_markers[vertex] = [self.canvas.create_oval(vertex.x - radius, vertex.y - radius,
                                                                vertex.x + radius, vertex.y + radius, width=3,
                                                                outline='red'), text, order]

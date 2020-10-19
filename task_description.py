@@ -11,7 +11,7 @@ class TaskDescription:
         self.task_type = self.task_info['type']
         self.path = self.task_info['path']
         self.transport = self.task_info['transport']
-
+        self.clear()
         x = {1: self.write_task_with_path, 2: self.write_task_with_path, 3: self.write_task_3, 4: self.write_task_4}
         x[self.task_type]()
 

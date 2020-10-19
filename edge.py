@@ -8,8 +8,8 @@ class TransportImage:
     def clicked(self, x, y):
         if len(self.image_coords) == 0:
             return False
-        return self.image_coords[0] - 20 <= x <= self.image_coords[0] + 20 and self.image_coords[1] - 20 <= \
-               y <= self.image_coords[1] + 20
+        return self.image_coords[0] - 20 <= x <= self.image_coords[0] + 20 and self.image_coords[1] - 20 <= y <= \
+               self.image_coords[1] + 20
 
     def add_image_info(self, img, coords, img_type):
         self.image_coords = coords

@@ -124,7 +124,8 @@ class Main:
         start_planet = 'venus'
         results_transport_units = self.get_results_transport_units()
 
-        if len(final_needed_path) == 1 and final_needed_path[0].name == start_planet and len(results_transport_units) == 0:
+        if len(final_needed_path) == 1 and final_needed_path[0].name == start_planet and len(
+                results_transport_units) == 0:
             print("Your path is correct")
             return
 
@@ -147,13 +148,13 @@ class Main:
                     edge_stats = edge.get_edge_stats()
                     if current_planet == edge_stats[0]:
                         if results_transport_units[current_transport_unit_index] == edge_stats[2]:
-                            backtracking(edge_stats[1], current_transport_unit_index+1, current_result)
-                        #v pripade ak z danej planety sa danym prostriedkom uz nikam inde nevieme dostat, tak vlastne je to spravne riesenie, pretoze ostaneme na dobrej planete
+                            backtracking(edge_stats[1], current_transport_unit_index + 1, current_result)
+                        # v pripade ak z danej planety sa danym prostriedkom uz nikam inde nevieme dostat, tak vlastne je to spravne riesenie, pretoze ostaneme na dobrej planete
                         else:
                             possible_paths.append(current_result)
                             return
 
-        backtracking(start_planet,0,[])
+        backtracking(start_planet, 0, [])
 
         final_needed_path_string = "".join(final_needed_path)
         for possible_path in possible_paths:
@@ -224,7 +225,7 @@ class Game:
         kind = 1
 
         if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-            #rocket
+            # rocket
             kind = 0
 
         self.append_to_results_transport_unit(kind)
