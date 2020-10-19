@@ -11,7 +11,6 @@ class Program:
         win = tkinter.Tk()
         self.canvas = tkinter.Canvas(master=win, height=1080, width=1920, bg='grey')
         self.canvas.pack()
-
         Main(self.canvas)
         win.mainloop()
 
@@ -42,12 +41,16 @@ class Main:
         self.game = Game(self.canvas, self.transport_images)
 
         self.te = None
-        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, 'venus')
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images)
         x = load_data()
         # typ ulohy 1-5
-        self.task_type = x[2]['type']
+        self.task_type = 1
         self.graph.load(x)
-        self.task = TaskDescription(self.canvas, x[2], self.planets_images)
+        # task_info = {'type': 1, 'path': ['venus', 'mars'], 'transport': []}
+        # task_info = {'type': 2, 'path': ['venus', 'mars', 'earth', 'neptune', 'saturn'], 'transport': []}
+        task_info = {'type': 3, 'path': ['venus'], 'transport': ['ufo', 'rocket', 'ufo']}
+        # task_info = {'type': 4, 'path': ['venus'], 'transport': ['ufo', 'rocket', 'ufo']}
+        self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
 
     def create_dictionary_for_images(self, path, image_list):
         images = {}
@@ -117,10 +120,11 @@ class Main:
         if len(final_needed_path) == 0:
             raise Exception("Data structure is wrong. At least one planet should be chosen to visit.")
 
-        start_planet = self.graph.get_start_planet()
+        # TODO start planet
+        start_planet = 'venus'
         results_transport_units = self.get_results_transport_units()
 
-        if len(final_needed_path) == 1 and final_needed_path[0] == start_planet and len(results_transport_units) == 0:
+        if len(final_needed_path) == 1 and final_needed_path[0].name == start_planet and len(results_transport_units) == 0:
             print("Your path is correct")
             return
 
@@ -149,7 +153,7 @@ class Main:
                             possible_paths.append(current_result)
                             return
 
-        backtracking(start_planet.name,0,[])
+        backtracking(start_planet,0,[])
 
         final_needed_path_string = "".join(final_needed_path)
         for possible_path in possible_paths:
@@ -167,7 +171,7 @@ class Main:
         return list_transport_units
 
     def save_map(self):
-        pass
+        self.te.save()
 
     def clean_main_menu(self):
         self.canvas.delete("all")

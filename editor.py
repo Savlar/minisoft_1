@@ -1,3 +1,5 @@
+import itertools
+import random
 import tkinter
 from graph import Graph
 from serialize import save_data
@@ -13,8 +15,7 @@ class TaskEditor(Graph):
         self.canvas.tag_bind("draw_ground", '<ButtonRelease-1>', self.end_drawing)
         self.canvas.tag_bind("change_transport_unit", '<Button-1>', self.change_transport_unit)
         self.canvas.bind('<Button-2>', self.delete_edge)
-        self.canvas.tag_bind("draw_ground", '<Button-3>', self.mark_vertex)
-
+        self.canvas.unbind('<Button-3>')
         self.line = None
 
     def change_transport_unit(self, e):
@@ -27,13 +28,11 @@ class TaskEditor(Graph):
                                           t)
                 break
 
+    def save(self):
+        save_data('data', self.edges, self.vertices)
+
     def start_drawing(self, e):
-        if self.clicked_save(e.x, e.y):
-            self.saved = True
-            markers = list(self.vertex_markers.keys())
-            save_data('data', self.edges, self.vertices, {'type': 1, 'path': [markers[0], markers[1]]})
-            return
-        self.points = [e.x, e.y]
+        self.points = [(e.x, e.y)]
 
     def delete_edge(self, e):
         for edge in self.edges:
@@ -42,21 +41,20 @@ class TaskEditor(Graph):
                 return
 
     def mouse_drag(self, e):
-        print(e)
-        self.points.append(e.x)
-        self.points.append(e.y)
+        self.points.append((e.x, e.y))
+        points = list(itertools.chain(*self.points))
         if self.line is None:
-            self.line = self.canvas.create_line(*self.points, width=3)
+            self.line = self.canvas.create_line(points, width=3)
         else:
-            self.canvas.coords(self.line, *self.points)
+            self.canvas.coords(self.line, points)
 
     def end_drawing(self, e):
         copy_points = self.simplify_line(e)
         self.canvas.delete(self.line)
         if len(copy_points) > 4:
-            edge = self.find_edge(copy_points[0], copy_points[1], copy_points[-2], copy_points[-1])
+            edge = self.find_edge(copy_points[0], copy_points[-1])
             if edge is not None:
-                self.line = self.canvas.create_line(*copy_points, width=3, smooth=True, splinesteps=3,
+                self.line = self.canvas.create_line(list(itertools.chain(*copy_points)), width=3, smooth=True, splinesteps=3,
                                                     arrow=tkinter.LAST)
                 if edge.line is not None:
                     self.delete_items(*edge.delete_edge())
@@ -71,23 +69,21 @@ class TaskEditor(Graph):
         if middle % 2 == 1:
             middle -= 1
         x, y = coords[middle], coords[middle + 1]
-        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['rocket_small'], tag="change_transport_unit"), (x, y), 0, )
+        edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['rocket_small'], tag="change_transport_unit"), (x, y), 0)
 
-    def mark_vertex(self, e):
-        for vertex in self.vertices:
-            if vertex.clicked(e.x, e.y):
-                try:
-                    self.delete_items(self.vertex_markers[vertex][0])
-                    self.delete_items(self.vertex_markers[vertex][1])
-                    deleted_order = self.vertex_markers[vertex][2]
-                    for marker in self.vertex_markers.values():
-                        if marker[2] > deleted_order:
-                            marker[2] = marker[2] - 1
-                            self.canvas.itemconfig(marker[1], text=marker[2])
-                    self.vertex_markers.pop(vertex)
-                except KeyError:
-                    order = len(self.vertex_markers.keys())
-                    self.create_marker(vertex, order + 1, True)
+    def simplify_line(self, e):
+        try:
+            copy_points = [self.points[0]]
+        except IndexError:
+            return []
+        for i in range(1, len(self.points)):
+            # if (e.x > self.points[i][0] + self.offset_last_point or e.x < self.points[i][0] - self.offset_last_point) and \
+            #         (e.y > self.points[i][1] + self.offset_last_point or e.y < self.points[i][1] - self.offset_last_point):
+            #     continue
+            if random.random() < 0.20:
+                copy_points.append(self.points[i])
+        copy_points.append((e.x, e.y))
+        return copy_points
 
     @staticmethod
     def clicked_save(x, y):

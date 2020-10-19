@@ -1,4 +1,3 @@
-import random
 import tkinter
 from edge import Edge
 from vertex import Vertex
@@ -6,15 +5,14 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, start_planet_name):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images):
         self.canvas = canvas
         self.image_size = 60
+        self.free = False
         self.vertex_markers = {}
         self.points = []
         self.edges = []
         self.vertices = []
-        self.start_planet_name = start_planet_name
-        self.start_planet_vertex = None
         self.planets_images = planets_images
         self.transport_images = transport_images
         self.create_vertices()
@@ -23,13 +21,8 @@ class Graph:
         self.canvas.bind('<Button-3>', self.mark_vertex)
         self.offset_last_point = 5
 
-    def get_start_planet(self):
-        return self.start_planet_vertex
-
     def draw_planets(self):
         for vertex in self.vertices:
-            if vertex.name == self.start_planet_name:
-                self.start_planet_vertex = vertex
             self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
@@ -54,28 +47,12 @@ class Graph:
                 if vertex is not neighbour:
                     self.edges.append(Edge(vertex, neighbour))
 
-    def find_edge(self, x1, y1, x2, y2):
+    def find_edge(self, start, end):
         area = 35
         for edge in self.edges:
-            if edge.connected_nodes(x1, y1, x2, y2, area):
+            if edge.connected_nodes(start[0], start[1], end[0], end[1], area):
                 return edge
         return None
-
-    def simplify_line(self, e):
-        try:
-            copy_points = [self.points[0], self.points[1]]
-        except IndexError:
-            return []
-        for i in range(2, len(self.points), 2):
-            if (e.x > self.points[i] + self.offset_last_point or e.x < self.points[i] - self.offset_last_point) and (e.y > self.points[i + 1] + self.offset_last_point or e.y < self.points[i + 1] - self.offset_last_point):
-                print("pass")
-                pass
-            if random.random() < 0.20:
-                copy_points.append(self.points[i])
-                copy_points.append(self.points[i + 1])
-        copy_points.append(e.x)
-        copy_points.append(e.y)
-        return copy_points
 
     def create_marker(self, vertex, order, mark=False):
         radius = self.image_size // 2
@@ -85,12 +62,23 @@ class Graph:
                                                                outline='red'), text, order]
 
     def mark_vertex(self, e):
-        marker_id = list(x[0] for x in self.vertex_markers.values())
-        self.canvas.delete(marker_id)
+        if not self.free:
+            self.delete_items(list(x[0] for x in self.vertex_markers.values()))
+            self.vertex_markers = {}
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
-                self.create_marker(vertex, 1)
-                return
+                try:
+                    self.delete_items(self.vertex_markers[vertex][0])
+                    self.delete_items(self.vertex_markers[vertex][1])
+                    deleted_order = self.vertex_markers[vertex][2]
+                    for marker in self.vertex_markers.values():
+                        if marker[2] > deleted_order:
+                            marker[2] = marker[2] - 1
+                            self.canvas.itemconfig(marker[1], text=marker[2])
+                    self.vertex_markers.pop(vertex)
+                except KeyError:
+                    order = len(self.vertex_markers.keys())
+                    self.create_marker(vertex, order + 1, self.free)
 
     def load(self, data):
         self.edges = data[0]

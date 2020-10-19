@@ -6,9 +6,10 @@ class TransportImage:
         self.img_type = 0
 
     def clicked(self, x, y):
-        if len(self.image_coords) == 0: return False
-        return self.image_coords[0] - 20 <= x <= self.image_coords[0] + 20 and self.image_coords[1] - 20 <= y <= \
-               self.image_coords[1] + 20
+        if len(self.image_coords) == 0:
+            return False
+        return self.image_coords[0] - 20 <= x <= self.image_coords[0] + 20 and self.image_coords[1] - 20 <= \
+               y <= self.image_coords[1] + 20
 
     def add_image_info(self, img, coords, img_type):
         self.image_coords = coords
@@ -36,8 +37,8 @@ class Edge:
     def clicked_edge(self, x, y):
         if self.points is None or len(self.points) == 0:
             return False
-        for i in range(0, len(self.points), 2):
-            point_x, point_y = self.points[i], self.points[i + 1]
+        for i in range(len(self.points)):
+            point_x, point_y = self.points[i][0], self.points[i][1]
             if point_x - 20 <= x <= point_x + 20 and point_y - 20 <= y <= point_y + 20:
                 return True
         return False
