@@ -1,3 +1,4 @@
+import random
 import tkinter
 
 from editor import TaskEditor
@@ -40,16 +41,26 @@ class Main:
 
         self.game = Game(self.canvas, self.transport_images)
 
+        self.path = []
+        self.transport_types = []
+        self.found_path = []
+        self.found_path_transport_types = []
         self.te = None
         self.graph = Graph(self.canvas, self.planets_images, self.transport_images)
         x = load_data()
-        # typ ulohy 1-5
-        self.task_type = 1
         self.graph.load(x)
-        # task_info = {'type': 1, 'path': ['venus', 'mars'], 'transport': []}
-        # task_info = {'type': 2, 'path': ['venus', 'mars', 'earth', 'neptune', 'saturn'], 'transport': []}
-        task_info = {'type': 3, 'path': ['venus'], 'transport': ['ufo', 'rocket', 'ufo']}
-        # task_info = {'type': 4, 'path': ['venus'], 'transport': ['ufo', 'rocket', 'ufo']}
+        self.found = False
+        self.paths = {2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+        self.generate_paths()
+        while True:
+            self.random_length = random.randint(2, 6)
+            if len(self.paths[self.random_length]) == 0:
+                continue
+            self.random_path = random.randint(0, len(self.paths[self.random_length]) - 1)
+            break
+        self.random_type = random.randint(1, 4)
+        task_info = {'type': self.random_type, 'path': self.paths[self.random_length][self.random_path][0],
+                     'transport': self.paths[self.random_length][self.random_path][1]}
         self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
 
     def create_dictionary_for_images(self, path, image_list):
@@ -91,6 +102,7 @@ class Main:
             if self.te is not None:
                 self.te.close()
             self.graph.delete_all()
+            self.task.clear()
             self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
             self.create_save_button()
 
@@ -102,7 +114,6 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
             if self.te is not None:
                 self.te.close()
-            self.clean_main_menu()
             self.reset()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
@@ -114,55 +125,54 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["save"]):
             self.save_map()
 
+    def generate_paths(self):
+        for source in self.graph.vertices:
+            for dest in self.graph.vertices:
+                self.path = []
+                self.transport_types = []
+                self.find_path(source, dest)
+
+    def find_path(self, current, dest):
+        if len(self.path) > 9:
+            return
+        self.path.append(current.name)
+        if current == dest and len(self.transport_types) > 1:
+            self.paths[len(self.transport_types)].append((self.path[:], self.transport_types[:]))
+            return
+        else:
+            for edge in self.graph.edges:
+                if edge.start == current and edge.is_edge():
+                    self.transport_types.append(edge.get_transport_name())
+                    self.find_path(edge.end, dest)
+                    self.transport_types.pop()
+        self.path.pop()
+
     def check_path(self):
-        final_needed_path = self.task.get_path()
-
-        if len(final_needed_path) == 0:
-            raise Exception("Data structure is wrong. At least one planet should be chosen to visit.")
-
-        # TODO start planet
-        start_planet = 'venus'
-        results_transport_units = self.get_results_transport_units()
-
-        if len(final_needed_path) == 1 and final_needed_path[0].name == start_planet and len(
-                results_transport_units) == 0:
-            print("Your path is correct")
-            return
-
-        if len(results_transport_units) == 0:
-            print("No transport units were used")
-            return
-
-        possible_paths = []
-        edges = self.graph.edges
-
-        def backtracking(current_planet, current_transport_unit_index, current_result):
-            current_result.append(current_planet)
-
-            if current_transport_unit_index >= len(results_transport_units):
-                possible_paths.append(current_result)
-                return
-
-            for edge in edges:
-                if edge.is_edge():
-                    edge_stats = edge.get_edge_stats()
-                    if current_planet == edge_stats[0]:
-                        if results_transport_units[current_transport_unit_index] == edge_stats[2]:
-                            backtracking(edge_stats[1], current_transport_unit_index + 1, current_result)
-                        # v pripade ak z danej planety sa danym prostriedkom uz nikam inde nevieme dostat, tak vlastne je to spravne riesenie, pretoze ostaneme na dobrej planete
-                        else:
-                            possible_paths.append(current_result)
-                            return
-
-        backtracking(start_planet, 0, [])
-
-        final_needed_path_string = "".join(final_needed_path)
-        for possible_path in possible_paths:
-            if "".join(possible_path) == final_needed_path_string:
-                print("You found out good path")
-                return
-
-        print("Your solution is not correct. Please try again")
+        if self.random_type in [3, 4]:
+            selected = list(self.graph.vertex_markers.keys())[0]
+            if self.random_type == 3:
+                for path in self.paths[self.random_length]:
+                    if path[0][-1] == selected.name and path[1] == self.paths[self.random_length][self.random_path][1]:
+                        print('Correct solution')
+                        return
+                print('Incorrect solution')
+            if self.random_type == 4:
+                for path in self.paths[self.random_length]:
+                    if path[0][0] == selected.name and path[1] == self.paths[self.random_length][self.random_path][1]:
+                        print('Correct solution')
+                        return
+                print('Incorrect solution')
+        elif self.random_type == 1:
+            selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
+            source = self.paths[self.random_length][self.random_path][0][0]
+            destination = self.paths[self.random_length][self.random_path][0][-1]
+            for path in self.paths[len(selected_transport)]:
+                if path[0][0] == source and path[0][-1] == destination:
+                    print('Correct solution')
+                    return
+            print('Incorrect solution')
+        else:
+            selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
 
     def get_results_transport_units(self):
         list_transport_units = []
@@ -180,6 +190,8 @@ class Main:
         self.canvas.unbind("<Button-1>", self.buttons_action_bind)
 
     def reset(self):
+        # self.game.remove_selected_objects()
+        self.clean_main_menu()
         self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
         Main(self.canvas)
@@ -237,6 +249,11 @@ class Game:
                                                        "rocket"] if kind == 0 else
                                                    self.transport_units["ufo"]),
                                             tag="results_clickable")))
+
+    def remove_selected_objects(self):
+        self.results_transport_units = []
+        for item in self.canvas.find_withtag('results_clickable'):
+            self.canvas.delete(item)
 
     def clean_transport_units_objects(self):
         for objc in self.transport_units_objects:

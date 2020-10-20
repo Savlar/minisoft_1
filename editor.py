@@ -77,11 +77,11 @@ class TaskEditor(Graph):
             copy_points = [self.points[0]]
         except IndexError:
             return []
-        for i in range(1, len(self.points)):
+        for i in range(1, len(self.points) - 3):
             # if (e.x > self.points[i][0] + self.offset_last_point or e.x < self.points[i][0] - self.offset_last_point) and \
             #         (e.y > self.points[i][1] + self.offset_last_point or e.y < self.points[i][1] - self.offset_last_point):
             #     continue
-            if random.random() < 0.20:
+            if random.random() < 0.2 or len(self.points) < 30:
                 copy_points.append(self.points[i])
         copy_points.append((e.x, e.y))
         return copy_points

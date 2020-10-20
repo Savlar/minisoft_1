@@ -10,6 +10,8 @@ class TaskDescription:
         self.task_info = task_info
         self.task_type = self.task_info['type']
         self.path = self.task_info['path']
+        if self.task_type == 1:
+            self.path = [self.path[0], self.path[-1]]
         self.transport = self.task_info['transport']
         self.clear()
         x = {1: self.write_task_with_path, 2: self.write_task_with_path, 3: self.write_task_3, 4: self.write_task_4}
@@ -54,7 +56,7 @@ class TaskDescription:
             self.canvas.create_image(1765, 150 + order * 100, image=self.transport_images[item], tag='description')
             order += 1
         self.canvas.create_text(1765, 100 + order * 100, text=strings[-2], tag='description')
-        self.canvas.create_image(1765, 150 + order * 100, image=self.planets_images[self.path[0]], tag='description')
+        self.canvas.create_image(1765, 150 + order * 100, image=self.planets_images[self.path[-1]], tag='description')
         order += 1
         self.canvas.create_text(1765, 100 + order * 100, text=strings[-1], tag='description')
 
