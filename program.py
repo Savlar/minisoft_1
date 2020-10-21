@@ -19,7 +19,7 @@ class Program:
 class Main:
     def __init__(self, canvas):
         self.canvas = canvas
-        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save"]
+        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "path", "task", "delete"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
