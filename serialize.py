@@ -7,5 +7,5 @@ def save_data(filename, edges, vertices):
 
 
 def load_data():
-    with open('data.pickle', 'rb') as read:
+    with open('./misc/data.pickle', 'rb') as read:
         return pickle.load(read)
