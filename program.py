@@ -18,7 +18,7 @@ class Program:
 
 
 class Main:
-    def __init__(self, canvas, file_name = None):
+    def __init__(self, canvas, file_name=None):
         self.canvas = canvas
         self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "delete"]
 
@@ -32,7 +32,7 @@ class Main:
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small"])
 
-        self.title_images = self.create_dictionary_for_images("textures/titles/",["menu","path","task"])
+        self.title_images = self.create_dictionary_for_images("textures/titles/", ["menu", "path", "task"])
 
         self.buttons_id = {}
 
@@ -75,10 +75,11 @@ class Main:
                                                                    image=self.buttons_basic_images[buttonName],
                                                                    tag="button")
             y += 65
-        self.buttons_id["check"] = self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],
+        self.buttons_id["check"] = self.canvas.create_image(1745, 850, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.canvas.create_image(1805, 50, image=self.title_images["task"])
+        self.canvas.create_image(1755, 50, image=self.title_images["task"], tag="title")
+        self.canvas.create_image(960, 820, image=self.title_images["path"], tag="title")
         self.canvas.update()
 
     def create_save_button(self):
@@ -141,7 +142,7 @@ class Main:
                 selected = selected[0]
             except IndexError:
                 print('Not selected planet')
-                return 
+                return
             if self.random_type == 3:
                 for path in self.g.all_paths[self.random_length]:
                     if path[0][-1] == selected.name and path[1] == \
@@ -204,7 +205,7 @@ class Game:
         self.transport_units = transport_units
         self.transport_units_objects = []
         self.results_transport_units = []
-        self.place_for_results_transport_units = self.canvas.create_rectangle(10, 870, 1120, 1060, tag="units_place")
+        self.place_for_results_transport_units = self.canvas.create_rectangle(400, 800, 1545, 950, tag="units_place")
         self.results_rectangle_coords = self.canvas.coords(self.place_for_results_transport_units)
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
@@ -242,9 +243,25 @@ class Game:
 
         self.append_to_results_transport_unit(kind)
 
+    def release_transport_unit(self, event):
+        if len(self.results_transport_units) != self.max_results_transport_units:
+            current_coords = [event.x, event.y]
+            kind = 1
+
+            if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
+                kind = 0
+
+            if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= \
+                    current_coords[
+                        0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
+                0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[
+                1] - 150:
+                self.append_to_results_transport_unit(kind)
+        self.remake_transport_units_objects()
+
     def append_to_results_transport_unit(self, kind):
         self.results_transport_units.append(
-            (kind, self.canvas.create_image(80 + len(self.results_transport_units) * 100, 960,
+            (kind, self.canvas.create_image(475 + len(self.results_transport_units) * 110, 880,
                                             image=(self.transport_units[
                                                        "rocket"] if kind == 0 else
                                                    self.transport_units["ufo"]),
@@ -262,9 +279,9 @@ class Game:
 
     def create_transport_units(self):
         self.transport_units_objects.append(
-            self.canvas.create_image(1240, 930, image=self.transport_units["rocket"], tag="movable"))
+            self.canvas.create_image(1745, 910, image=self.transport_units["rocket"], tag="movable"))
         self.transport_units_objects.append(
-            self.canvas.create_image(1250, 1000, image=self.transport_units["ufo"], tag="movable"))
+            self.canvas.create_image(1755, 970, image=self.transport_units["ufo"], tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()
@@ -272,34 +289,3 @@ class Game:
 
     def move_transport_unit(self, event):
         self.canvas.coords("current", event.x, event.y)
-
-    def release_transport_unit(self, event):
-        if len(self.results_transport_units) != self.max_results_transport_units:
-            current_coords = [event.x, event.y]
-            kind = 1
-
-            if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-                kind = 0
-
-            if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= \
-                    current_coords[
-                        0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
-                0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[
-                1] - 150:
-                self.results_transport_units.append((kind,
-                                                     self.canvas.create_image(
-                                                         80 + len(self.results_transport_units) * 100, 960, image=(
-                                                             self.transport_units["rocket"] if kind == 0 else
-                                                             self.transport_units["ufo"]),
-                                                         tag="results_clickable")))
-        self.remake_transport_units_objects()
-
-
-class Settings:
-    def __init__(self, canvas):
-        self.canvas = canvas
-
-    def return_to_menu(self, event):
-        self.canvas.unbind_all("<Escape>")
-        self.canvas.delete("all")
-        Main(self.canvas)

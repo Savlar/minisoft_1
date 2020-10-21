@@ -5,7 +5,7 @@ class TaskDescription:
 
     def __init__(self, canvas, task_info, planets_images, transport_images):
         self.canvas: tkinter.Canvas = canvas
-        self.x = 1800
+        self.x = 1750
         self.planets_images = planets_images
         self.transport_images = transport_images
         self.task_info = task_info
