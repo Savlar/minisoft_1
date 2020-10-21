@@ -20,6 +20,8 @@ class Program:
 class Main:
     def __init__(self, canvas, file_name=None):
         self.canvas = canvas
+        self.random_type = random.randint(1, 4)
+        self.msg = self.canvas.create_text(1730, 800, text='', font=('Arial', 18))
         self.game = None
         self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "delete"]
 
@@ -42,7 +44,6 @@ class Main:
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
 
         self.te = None
-        self.random_type = random.randint(1, 4)
 
         self.g = Graph(self.canvas, self.planets_images, self.transport_images, self.random_type > 2)
 
@@ -80,7 +81,8 @@ class Main:
                                                             tag="button")
 
         self.canvas.create_image(1755, 50, image=self.title_images["task"], tag="title")
-        self.canvas.create_image(960, 820, image=self.title_images["path"], tag="title")
+        if self.random_type < 3:
+            self.canvas.create_image(960, 880, image=self.title_images["path"], tag="title")
         self.canvas.update()
 
     def remove_objects_with_tag(self,tag):
@@ -120,6 +122,7 @@ class Main:
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
             if self.te is not None:
                 return
+            self.change_text('')
             self.g.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
@@ -154,41 +157,44 @@ class Main:
         if self.random_type in [3, 4]:
             selected = list(self.g.vertex_markers.keys())
             try:
-                selected = selected[0]
+                selected = selected[0].name
             except IndexError:
-                print('Not selected planet')
+                self.change_text('Nebola vybrana planeta')
                 return
             if self.random_type == 3:
                 for path in self.g.all_paths[self.random_length]:
-                    if path[0][-1] == selected.name and path[1] == \
-                            self.g.all_paths[self.random_length][self.random_path][1]:
-                        print('Correct solution')
+                    if path[1] == self.g.all_paths[self.random_length][self.random_path][1] and path[0][-1] == selected\
+                            and path[0][0] == self.g.all_paths[self.random_length][self.random_path][0][0]:
+                        self.change_text('Spravne riesenie')
                         return
-                print('Incorrect solution')
+                self.change_text('Nespravne riesnie')
             if self.random_type == 4:
                 for path in self.g.all_paths[self.random_length]:
-                    if path[0][0] == selected.name and path[1] == \
-                            self.g.all_paths[self.random_length][self.random_path][1]:
-                        print('Correct solution')
+                    if path[1] == self.g.all_paths[self.random_length][self.random_path][1] and path[0][0] == selected\
+                            and path[0][-1] == self.g.all_paths[self.random_length][self.random_path][0][-1]:
+                        self.change_text('Spravne riesenie')
                         return
-                print('Incorrect solution')
+                self.change_text('Nespravne riesnie')
         elif self.random_type == 1:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
             source = self.g.all_paths[self.random_length][self.random_path][0][0]
             destination = self.g.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.g.all_paths[len(selected_transport)]:
                 if path[0][0] == source and path[0][-1] == destination and path[1] == selected_transport:
-                    print('Correct solution')
+                    self.change_text('Spravne riesenie')
                     return
-            print('Incorrect solution')
+            self.change_text('Nespravne riesnie')
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
             for path in self.g.all_paths[len(selected_transport)]:
                 if path[1] == selected_transport and self.g.all_paths[self.random_length][self.random_path][0] == path[
                     0]:
-                    print('Correct solution')
+                    self.change_text('Spravne riesenie')
                     return
-            print('Incorrect solution')
+            self.change_text('Nespravne riesnie')
+
+    def change_text(self, text):
+        self.canvas.itemconfig(self.msg, text=text)
 
     def get_results_transport_units(self):
         list_transport_units = []
@@ -220,7 +226,7 @@ class Game:
         self.transport_units = transport_units
         self.transport_units_objects = []
         self.results_transport_units = []
-        self.place_for_results_transport_units = self.canvas.create_rectangle(400, 800, 1545, 950, tag="units_place")
+        self.place_for_results_transport_units = self.canvas.create_rectangle(400, 850, 1545, 1000, tag="units_place")
         self.results_rectangle_coords = self.canvas.coords(self.place_for_results_transport_units)
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
@@ -276,7 +282,7 @@ class Game:
 
     def append_to_results_transport_unit(self, kind):
         self.results_transport_units.append(
-            (kind, self.canvas.create_image(475 + len(self.results_transport_units) * 110, 880,
+            (kind, self.canvas.create_image(475 + len(self.results_transport_units) * 110, 930,
                                             image=(self.transport_units[
                                                        "rocket"] if kind == 0 else
                                                    self.transport_units["ufo"]),

@@ -10,7 +10,7 @@ class TaskDescription:
         self.transport_images = transport_images
         self.task_info = task_info
         self.task_type = self.task_info['type']
-        self.from_image = tkinter.PhotoImage(file="./textures/from.png")
+        self.from_image = tkinter.PhotoImage(file="./textures/texts/from.png")
         self.path = self.task_info['path'][:]
         if self.task_type == 1:
             self.path = [self.path[0], self.path[-1]]
