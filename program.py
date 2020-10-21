@@ -98,8 +98,7 @@ class Main:
                                                     filetypes=(("Serialized python structure",
                                                                 "*.pickle*"),
                                                                ))
-
-        if self.file_name is not None and self.file_name != '':
+        if self.file_name is not None and self.file_name != '' and not isinstance(self.file_name, tuple):
             self.reset()
 
     def buttons_action(self, event):
@@ -137,7 +136,12 @@ class Main:
 
     def check_path(self):
         if self.random_type in [3, 4]:
-            selected = list(self.g.vertex_markers.keys())[0]
+            selected = list(self.g.vertex_markers.keys())
+            try:
+                selected = selected[0]
+            except IndexError:
+                print('Not selected planet')
+                return 
             if self.random_type == 3:
                 for path in self.g.all_paths[self.random_length]:
                     if path[0][-1] == selected.name and path[1] == \
