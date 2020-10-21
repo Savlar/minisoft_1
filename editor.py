@@ -29,7 +29,7 @@ class TaskEditor(Graph):
                 break
 
     def save(self):
-        save_data('data', self.edges, self.vertices)
+        save_data('misc/data', self.edges, self.vertices)
 
     def start_drawing(self, e):
         self.points = [(e.x, e.y)]

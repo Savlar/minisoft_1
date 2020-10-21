@@ -40,7 +40,9 @@ class Main:
         self.create_rectangles()
 
         self.te = None
-        self.g = Graph(self.canvas, self.planets_images, self.transport_images)
+        self.random_type = random.randint(1, 4)
+
+        self.g = Graph(self.canvas, self.planets_images, self.transport_images, self.random_type > 2)
         x = load_data()
         self.g.load(x)
         self.g.generate_paths()
@@ -50,7 +52,6 @@ class Main:
                 continue
             self.random_path = random.randint(0, len(self.g.all_paths[self.random_length]) - 1)
             break
-        self.random_type = random.randint(1, 4)
         if self.random_type in [1, 2]:
             self.game = Game(self.canvas, self.transport_images)
         task_info = {'type': self.random_type, 'path': self.g.all_paths[self.random_length][self.random_path][0],

@@ -5,7 +5,7 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, mark=False):
         self.canvas = canvas
         self.image_size = 60
         self.free = False
@@ -20,7 +20,8 @@ class Graph:
         self.create_vertices()
         self.create_edges()
         self.draw_planets()
-        self.canvas.bind('<Button-3>', self.mark_vertex)
+        if mark:
+            self.canvas.bind('<Button-3>', self.mark_vertex)
         self.offset_last_point = 5
 
     def draw_planets(self):
