@@ -1,5 +1,6 @@
 import random
 import tkinter
+from tkinter import filedialog
 
 from editor import TaskEditor
 from graph import Graph
@@ -17,9 +18,10 @@ class Program:
 
 
 class Main:
-    def __init__(self, canvas):
+    def __init__(self, canvas, file_name = None):
         self.canvas = canvas
-        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "path", "task", "delete"]
+        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "path", "task",
+                                    "delete"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
@@ -43,7 +45,9 @@ class Main:
         self.random_type = random.randint(1, 4)
 
         self.g = Graph(self.canvas, self.planets_images, self.transport_images, self.random_type > 2)
-        x = load_data()
+
+        self.file_name = file_name
+        x = load_data(self.file_name)
         self.g.load(x)
         self.g.generate_paths()
         while True:
@@ -66,17 +70,17 @@ class Main:
         return images
 
     def create_rectangles(self):
-        self.canvas.create_rectangle(10, 80, 1650, 850)
-        self.canvas.create_rectangle(1660, 80, 1870, 1050)
+        pass
+        #self.canvas.create_rectangle(10, 80, 1650, 850)
+        #self.canvas.create_rectangle(1660, 80, 1870, 1050)
 
     def create_buttons(self):
         x = 120
-        for buttonName in self.buttons_basic_images.keys():
-            if buttonName != "check" and buttonName != "save":
-                self.buttons_id[buttonName] = self.canvas.create_image(x, 30,
-                                                                       image=self.buttons_basic_images[buttonName],
-                                                                       tag="button")
-                x += 250
+        for buttonName in ["load", "editor", "reset", "close"]:
+            self.buttons_id[buttonName] = self.canvas.create_image(x, 30,
+                                                                   image=self.buttons_basic_images[buttonName],
+                                                                   tag="button")
+            x += 210
         self.buttons_id["check"] = self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],
                                                             tag="button")
         self.canvas.update()
@@ -92,8 +96,17 @@ class Main:
             else:
                 self.canvas.itemconfig(self.buttons_id[buttonsName], image=self.buttons_basic_images[buttonsName])
 
+    def browse_file(self):
+        self.file_name = filedialog.askopenfilename(initialdir="/",
+                                                    title="Select a File",
+                                                    filetypes=(("Serialized python structure",
+                                                                "*.pickle*"),
+                                                               ))
+
+        self.reset()
+
     def buttons_action(self, event):
-        if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
+        if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
             if self.te is not None:
                 self.te.close()
             self.g.delete_all()
@@ -101,10 +114,10 @@ class Main:
             self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
             self.create_save_button()
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["settings"]):
+        if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             if self.te is not None:
                 self.te.close()
-            Settings(self.canvas)
+            self.browse_file()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
             if self.te is not None:
@@ -118,7 +131,8 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["save"]):
+        elif self.buttons_id["save"] is not None and self.canvas.coords("current") == self.canvas.coords(
+                self.buttons_id["save"]):
             if self.te.correct_map():
                 self.save_map()
             else:
@@ -129,13 +143,15 @@ class Main:
             selected = list(self.g.vertex_markers.keys())[0]
             if self.random_type == 3:
                 for path in self.g.all_paths[self.random_length]:
-                    if path[0][-1] == selected.name and path[1] == self.g.all_paths[self.random_length][self.random_path][1]:
+                    if path[0][-1] == selected.name and path[1] == \
+                            self.g.all_paths[self.random_length][self.random_path][1]:
                         print('Correct solution')
                         return
                 print('Incorrect solution')
             if self.random_type == 4:
                 for path in self.g.all_paths[self.random_length]:
-                    if path[0][0] == selected.name and path[1] == self.g.all_paths[self.random_length][self.random_path][1]:
+                    if path[0][0] == selected.name and path[1] == \
+                            self.g.all_paths[self.random_length][self.random_path][1]:
                         print('Correct solution')
                         return
                 print('Incorrect solution')
@@ -151,7 +167,8 @@ class Main:
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
             for path in self.g.all_paths[len(selected_transport)]:
-                if path[1] == selected_transport and self.g.all_paths[self.random_length][self.random_path][0] == path[0]:
+                if path[1] == selected_transport and self.g.all_paths[self.random_length][self.random_path][0] == path[
+                    0]:
                     print('Correct solution')
                     return
             print('Incorrect solution')
@@ -176,7 +193,7 @@ class Main:
         self.clean_main_menu()
         self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
-        Main(self.canvas)
+        Main(self.canvas, self.file_name)
 
 
 class Game:
