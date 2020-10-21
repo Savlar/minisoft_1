@@ -162,7 +162,7 @@ class Main:
             source = self.g.all_paths[self.random_length][self.random_path][0][0]
             destination = self.g.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.g.all_paths[len(selected_transport)]:
-                if path[0][0] == source and path[0][-1] == destination:
+                if path[0][0] == source and path[0][-1] == destination and path[1] == selected_transport:
                     print('Correct solution')
                     return
             print('Incorrect solution')
