@@ -20,8 +20,7 @@ class Program:
 class Main:
     def __init__(self, canvas, file_name = None):
         self.canvas = canvas
-        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "path", "task",
-                                    "delete"]
+        self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "delete"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
@@ -33,13 +32,13 @@ class Main:
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small"])
 
+        self.title_images = self.create_dictionary_for_images("textures/titles/",["menu","path","task"])
+
         self.buttons_id = {}
 
         self.create_buttons()
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
-
-        self.create_rectangles()
 
         self.te = None
         self.random_type = random.randint(1, 4)
@@ -69,11 +68,6 @@ class Main:
             images[item] = tkinter.PhotoImage(file=f"{path}{item}.png")
         return images
 
-    def create_rectangles(self):
-        pass
-        #self.canvas.create_rectangle(10, 80, 1650, 850)
-        #self.canvas.create_rectangle(1660, 80, 1870, 1050)
-
     def create_buttons(self):
         x = 120
         for buttonName in ["load", "editor", "reset", "close"]:
@@ -83,6 +77,8 @@ class Main:
             x += 210
         self.buttons_id["check"] = self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],
                                                             tag="button")
+
+        self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],tag="button")
         self.canvas.update()
 
     def create_save_button(self):
@@ -103,7 +99,8 @@ class Main:
                                                                 "*.pickle*"),
                                                                ))
 
-        self.reset()
+        if self.file_name is not None and self.file_name != '':
+            self.reset()
 
     def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
