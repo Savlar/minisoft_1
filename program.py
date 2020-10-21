@@ -69,12 +69,12 @@ class Main:
         return images
 
     def create_buttons(self):
-        x = 120
+        y = 50
         for buttonName in ["load", "editor", "reset", "close"]:
-            self.buttons_id[buttonName] = self.canvas.create_image(x, 30,
+            self.buttons_id[buttonName] = self.canvas.create_image(150, y,
                                                                    image=self.buttons_basic_images[buttonName],
                                                                    tag="button")
-            x += 210
+            y += 65
         self.buttons_id["check"] = self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],
                                                             tag="button")
 

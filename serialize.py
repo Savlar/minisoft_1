@@ -9,7 +9,7 @@ def save_data(edges, vertices):
 
 
 def load_data(file_name):
-    if file_name is None:
+    if file_name is None or file_name == '' or isinstance(file_name, tuple):
         file_name = './misc/data.pickle'
     with open(file_name, 'rb') as read:
         return pickle.load(read)
