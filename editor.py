@@ -78,9 +78,6 @@ class TaskEditor(Graph):
         except IndexError:
             return []
         for i in range(1, len(self.points) - 3):
-            # if (e.x > self.points[i][0] + self.offset_last_point or e.x < self.points[i][0] - self.offset_last_point) and \
-            #         (e.y > self.points[i][1] + self.offset_last_point or e.y < self.points[i][1] - self.offset_last_point):
-            #     continue
             if random.random() < 0.2 or len(self.points) < 30:
                 copy_points.append(self.points[i])
         copy_points.append((e.x, e.y))
@@ -91,9 +88,16 @@ class TaskEditor(Graph):
         return 25 <= x <= 75 and 85 <= y <= 135
 
     def close(self):
-        self.canvas.unbind('<Button-1>')
-        self.canvas.unbind('<B1-Motion>')
-        self.canvas.unbind('<ButtonRelease-1>')
+        self.canvas.tag_unbind('draw_ground', '<Button-1>')
+        self.canvas.tag_unbind('draw_ground', '<B1-Motion>')
+        self.canvas.tag_unbind('draw_ground', '<ButtonRelease-1>')
         self.canvas.unbind('<Button-3>')
         self.canvas.unbind('<Button-2>')
         self.canvas.unbind('<Button-3>')
+
+    def correct_map(self):
+        self.generate_paths()
+        for i in range(2, 9):
+            if len(self.all_paths[i]) > 0:
+                return True
+        return False

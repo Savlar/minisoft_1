@@ -10,6 +10,8 @@ class Graph:
         self.image_size = 60
         self.free = False
         self.vertex_markers = {}
+        self.all_paths = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+        self.path = []
         self.points = []
         self.edges = []
         self.vertices = []
@@ -97,3 +99,30 @@ class Graph:
             self.delete_items(marker[1])
         for edge in self.edges:
             self.delete_items(*edge.delete_edge())
+
+    def generate_paths(self):
+        self.all_paths = {k: [] for k in self.all_paths}
+        self.all_paths[0] = [(['mercury'], []), (['venus'], []), (['earth'], []), (['mars'], []),
+                              (['jupiter'], []), (['saturn'], []), (['uranus'], []), (['neptune'], [])]
+        for source in self.vertices:
+            for dest in self.vertices:
+                self.path = []
+                self.find_path(source, dest)
+
+    def find_path(self, current, dest):
+        if len(self.path) > 8:
+            return
+        if current == dest and len(self.path) > 0:
+            vertices = [self.path[0].start.name]
+            transport = []
+            for edge in self.path:
+                vertices.append(edge.end.name)
+                transport.append('rocket' if edge.get_transport_type() == 0 else 'ufo')
+            self.all_paths[len(transport)].append((vertices, transport))
+            return
+        else:
+            for edge in self.edges:
+                if edge.start == current and edge.is_edge():
+                    self.path.append(edge)
+                    self.find_path(edge.end, dest)
+                    self.path.pop()
