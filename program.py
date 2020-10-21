@@ -39,7 +39,6 @@ class Main:
 
         self.create_rectangles()
 
-        self.game = Game(self.canvas, self.transport_images)
 
         self.path = []
         self.transport_types = []
@@ -59,6 +58,8 @@ class Main:
             self.random_path = random.randint(0, len(self.paths[self.random_length]) - 1)
             break
         self.random_type = random.randint(1, 4)
+        if self.random_type in [1, 2]:
+            self.game = Game(self.canvas, self.transport_images)
         task_info = {'type': self.random_type, 'path': self.paths[self.random_length][self.random_path][0],
                      'transport': self.paths[self.random_length][self.random_path][1]}
         self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
