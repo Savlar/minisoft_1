@@ -32,7 +32,7 @@ class Main:
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small"])
 
-        self.title_images = self.create_dictionary_for_images("textures/titles/", ["menu", "path", "task"])
+        self.title_images = self.create_dictionary_for_images("textures/titles/", ["path", "task"])
 
         self.buttons_id = {}
 
@@ -105,7 +105,7 @@ class Main:
     def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
             if self.te is not None:
-                self.te.close()
+                return
             self.g.delete_all()
             self.task.clear()
             self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)

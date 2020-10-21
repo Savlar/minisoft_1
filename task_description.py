@@ -10,6 +10,7 @@ class TaskDescription:
         self.transport_images = transport_images
         self.task_info = task_info
         self.task_type = self.task_info['type']
+        self.from_image = tkinter.PhotoImage(file="./textures/from.png")
         self.path = self.task_info['path'][:]
         if self.task_type == 1:
             self.path = [self.path[0], self.path[-1]]
@@ -28,6 +29,7 @@ class TaskDescription:
         order = 0
         for item in self.path:
             self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[item], tag='description')
+            #self.canvas.create_image(self.x, 100 + order * 100, image=self.from_image, tag='description')
             self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')
             order += 1
 
