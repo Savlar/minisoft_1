@@ -9,7 +9,7 @@ class TaskDescription:
         self.transport_images = transport_images
         self.task_info = task_info
         self.task_type = self.task_info['type']
-        self.path = self.task_info['path']
+        self.path = self.task_info['path'][:]
         if self.task_type == 1:
             self.path = [self.path[0], self.path[-1]]
         self.transport = self.task_info['transport']

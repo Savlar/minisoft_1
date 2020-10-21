@@ -39,29 +39,22 @@ class Main:
 
         self.create_rectangles()
 
-
-        self.path = []
-        self.transport_types = []
-        self.found_path = []
-        self.found_path_transport_types = []
         self.te = None
-        self.graph = Graph(self.canvas, self.planets_images, self.transport_images)
+        self.g = Graph(self.canvas, self.planets_images, self.transport_images)
         x = load_data()
-        self.graph.load(x)
-        self.found = False
-        self.paths = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
-        self.generate_paths()
+        self.g.load(x)
+        self.g.generate_paths()
         while True:
             self.random_length = random.randint(2, 6)
-            if len(self.paths[self.random_length]) == 0:
+            if len(self.g.all_paths[self.random_length]) == 0:
                 continue
-            self.random_path = random.randint(0, len(self.paths[self.random_length]) - 1)
+            self.random_path = random.randint(0, len(self.g.all_paths[self.random_length]) - 1)
             break
         self.random_type = random.randint(1, 4)
         if self.random_type in [1, 2]:
             self.game = Game(self.canvas, self.transport_images)
-        task_info = {'type': self.random_type, 'path': self.paths[self.random_length][self.random_path][0],
-                     'transport': self.paths[self.random_length][self.random_path][1]}
+        task_info = {'type': self.random_type, 'path': self.g.all_paths[self.random_length][self.random_path][0],
+                     'transport': self.g.all_paths[self.random_length][self.random_path][1]}
         self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
 
     def create_dictionary_for_images(self, path, image_list):
@@ -102,7 +95,7 @@ class Main:
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             if self.te is not None:
                 self.te.close()
-            self.graph.delete_all()
+            self.g.delete_all()
             self.task.clear()
             self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
             self.create_save_button()
@@ -115,6 +108,7 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
             if self.te is not None:
                 self.te.close()
+                self.te = None
             self.reset()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
@@ -124,56 +118,42 @@ class Main:
             self.check_path()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["save"]):
-            self.save_map()
-
-    def generate_paths(self):
-        for source in self.graph.vertices:
-            for dest in self.graph.vertices:
-                self.path = []
-                self.transport_types = []
-                self.find_path(source, dest)
-
-    def find_path(self, current, dest):
-        if len(self.path) > 8:
-            return
-        self.path.append(current.name)
-        if current == dest and len(self.transport_types) > 0:
-            self.paths[len(self.transport_types)].append((self.path[:], self.transport_types[:]))
-            return
-        else:
-            for edge in self.graph.edges:
-                if edge.start == current and edge.is_edge():
-                    self.transport_types.append(edge.get_transport_name())
-                    self.find_path(edge.end, dest)
-                    self.transport_types.pop()
-        self.path.pop()
+            if self.te.correct_map():
+                self.save_map()
+            else:
+                print('Wrong map')
 
     def check_path(self):
         if self.random_type in [3, 4]:
-            selected = list(self.graph.vertex_markers.keys())[0]
+            selected = list(self.g.vertex_markers.keys())[0]
             if self.random_type == 3:
-                for path in self.paths[self.random_length]:
-                    if path[0][-1] == selected.name and path[1] == self.paths[self.random_length][self.random_path][1]:
+                for path in self.g.all_paths[self.random_length]:
+                    if path[0][-1] == selected.name and path[1] == self.g.all_paths[self.random_length][self.random_path][1]:
                         print('Correct solution')
                         return
                 print('Incorrect solution')
             if self.random_type == 4:
-                for path in self.paths[self.random_length]:
-                    if path[0][0] == selected.name and path[1] == self.paths[self.random_length][self.random_path][1]:
+                for path in self.g.all_paths[self.random_length]:
+                    if path[0][0] == selected.name and path[1] == self.g.all_paths[self.random_length][self.random_path][1]:
                         print('Correct solution')
                         return
                 print('Incorrect solution')
         elif self.random_type == 1:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
-            source = self.paths[self.random_length][self.random_path][0][0]
-            destination = self.paths[self.random_length][self.random_path][0][-1]
-            for path in self.paths[len(selected_transport)]:
+            source = self.g.all_paths[self.random_length][self.random_path][0][0]
+            destination = self.g.all_paths[self.random_length][self.random_path][0][-1]
+            for path in self.g.all_paths[len(selected_transport)]:
                 if path[0][0] == source and path[0][-1] == destination:
                     print('Correct solution')
                     return
             print('Incorrect solution')
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
+            for path in self.g.all_paths[len(selected_transport)]:
+                if path[1] == selected_transport and self.g.all_paths[self.random_length][self.random_path][0] == path[0]:
+                    print('Correct solution')
+                    return
+            print('Incorrect solution')
 
     def get_results_transport_units(self):
         list_transport_units = []
