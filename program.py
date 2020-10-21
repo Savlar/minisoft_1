@@ -50,7 +50,7 @@ class Main:
         x = load_data()
         self.graph.load(x)
         self.found = False
-        self.paths = {2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+        self.paths = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
         self.generate_paths()
         while True:
             self.random_length = random.randint(2, 6)
@@ -133,10 +133,10 @@ class Main:
                 self.find_path(source, dest)
 
     def find_path(self, current, dest):
-        if len(self.path) > 9:
+        if len(self.path) > 8:
             return
         self.path.append(current.name)
-        if current == dest and len(self.transport_types) > 1:
+        if current == dest and len(self.transport_types) > 0:
             self.paths[len(self.transport_types)].append((self.path[:], self.transport_types[:]))
             return
         else:
