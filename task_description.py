@@ -20,7 +20,7 @@ class TaskDescription:
         x[self.task_type]()
 
     def write_task_with_path(self):
-        strings = ['Chces sa dostat z']
+        strings = ['Chceš sa dostať z']
         if len(self.path) > 2:
             strings.append('cez')
         for i in range(len(self.path) - 3):
@@ -34,10 +34,10 @@ class TaskDescription:
             order += 1
 
     def write_task_3(self):
-        strings = ['Zacali sme na planete', 'a isli sme']
+        strings = ['Začali sme na planéte', 'a išli sme']
         for i in range(len(self.transport) - 1):
             strings.append('a')
-        strings.append('Kde sme skoncili?')
+        strings.append('Kde sme skončili?')
         order = 0
         self.canvas.create_text(self.x, 100, text=strings[0], tag='description')
         self.canvas.create_image(self.x, 150, image=self.planets_images[self.path[0]], tag='description')
@@ -48,11 +48,11 @@ class TaskDescription:
         self.canvas.create_text(self.x, 100 + (1 + order) * 100, text=strings[-1], tag='description')
 
     def write_task_4(self):
-        strings = ['Isli sme']
+        strings = ['Išli sme']
         for i in range(len(self.transport) - 1):
             strings.append('a')
-        strings.append('a skoncili sme na')
-        strings.append('Kde sme zacali?')
+        strings.append('a skončili sme na')
+        strings.append('Kde sme začali?')
         order = 0
         for item in self.transport:
             self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')

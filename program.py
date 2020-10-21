@@ -20,6 +20,7 @@ class Program:
 class Main:
     def __init__(self, canvas, file_name=None):
         self.canvas = canvas
+        self.game = None
         self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "delete"]
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
@@ -82,9 +83,15 @@ class Main:
         self.canvas.create_image(960, 820, image=self.title_images["path"], tag="title")
         self.canvas.update()
 
-    def create_save_button(self):
-        self.buttons_id["save"] = self.canvas.create_image(1250, 30, image=self.buttons_basic_images["save"],
+    def remove_objects_with_tag(self,tag):
+        for item in self.canvas.find_withtag(tag):
+            self.canvas.delete(item)
+
+    def create_editor_buttons(self):
+        self.buttons_id["save"] = self.canvas.create_image(150, 500, image=self.buttons_basic_images["save"],
                                                            tag="button")
+        #self.buttons_id["delete"] = self.canvas.create_image(150, 560, image=self.buttons_basic_images["delete"],
+                                                           #tag="button")
 
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
@@ -102,14 +109,22 @@ class Main:
         if self.file_name is not None and self.file_name != '' and not isinstance(self.file_name, tuple):
             self.reset()
 
+    def delete_unused_editor_buttons(self):
+        self.canvas.delete(self.buttons_id["check"])
+        self.remove_objects_with_tag('title')
+        if self.game:
+            self.canvas.delete(self.game.place_for_results_transport_units)
+            self.game.clean_transport_units_objects()
+
     def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
             if self.te is not None:
                 return
             self.g.delete_all()
             self.task.clear()
+            self.delete_unused_editor_buttons()
             self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
-            self.create_save_button()
+            self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
             if self.te is not None:
