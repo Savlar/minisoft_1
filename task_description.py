@@ -5,6 +5,7 @@ class TaskDescription:
 
     def __init__(self, canvas, task_info, planets_images, transport_images):
         self.canvas: tkinter.Canvas = canvas
+        self.x = 1800
         self.planets_images = planets_images
         self.transport_images = transport_images
         self.task_info = task_info
@@ -26,8 +27,8 @@ class TaskDescription:
         strings.append('do')
         order = 0
         for item in self.path:
-            self.canvas.create_image(1765, 150 + order * 100, image=self.planets_images[item], tag='description')
-            self.canvas.create_text(1765, 100 + order * 100, text=strings[order], tag='description')
+            self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[item], tag='description')
+            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')
             order += 1
 
     def write_task_3(self):
@@ -36,13 +37,13 @@ class TaskDescription:
             strings.append('a')
         strings.append('Kde sme skoncili?')
         order = 0
-        self.canvas.create_text(1765, 100, text=strings[0], tag='description')
-        self.canvas.create_image(1765, 150, image=self.planets_images[self.path[0]], tag='description')
+        self.canvas.create_text(self.x, 100, text=strings[0], tag='description')
+        self.canvas.create_image(self.x, 150, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
-            self.canvas.create_image(1765, 250 + order * 100, image=self.transport_images[item], tag='description')
-            self.canvas.create_text(1765, 200 + order * 100, text=strings[order + 1], tag='description')
+            self.canvas.create_image(self.x, 250 + order * 100, image=self.transport_images[item], tag='description')
+            self.canvas.create_text(self.x, 200 + order * 100, text=strings[order + 1], tag='description')
             order += 1
-        self.canvas.create_text(1765, 100 + (1 + order) * 100, text=strings[-1], tag='description')
+        self.canvas.create_text(self.x, 100 + (1 + order) * 100, text=strings[-1], tag='description')
 
     def write_task_4(self):
         strings = ['Isli sme']
@@ -52,13 +53,13 @@ class TaskDescription:
         strings.append('Kde sme zacali?')
         order = 0
         for item in self.transport:
-            self.canvas.create_text(1765, 100 + order * 100, text=strings[order], tag='description')
-            self.canvas.create_image(1765, 150 + order * 100, image=self.transport_images[item], tag='description')
+            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')
+            self.canvas.create_image(self.x, 150 + order * 100, image=self.transport_images[item], tag='description')
             order += 1
-        self.canvas.create_text(1765, 100 + order * 100, text=strings[-2], tag='description')
-        self.canvas.create_image(1765, 150 + order * 100, image=self.planets_images[self.path[-1]], tag='description')
+        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-2], tag='description')
+        self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[self.path[-1]], tag='description')
         order += 1
-        self.canvas.create_text(1765, 100 + order * 100, text=strings[-1], tag='description')
+        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-1], tag='description')
 
     def clear(self):
         for item in self.canvas.find_withtag('description'):

@@ -78,7 +78,7 @@ class Main:
         self.buttons_id["check"] = self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.canvas.create_image(1500, 960, image=self.buttons_basic_images["check"],tag="button")
+        self.canvas.create_image(1805, 50, image=self.title_images["task"])
         self.canvas.update()
 
     def create_save_button(self):
