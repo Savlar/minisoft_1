@@ -29,8 +29,7 @@ class TaskDescription:
         order = 0
         for item in self.path:
             self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[item], tag='description')
-            #self.canvas.create_image(self.x, 100 + order * 100, image=self.from_image, tag='description')
-            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')
+            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], font=("Mali",14), tag='description')
             order += 1
 
     def write_task_3(self):
@@ -39,13 +38,13 @@ class TaskDescription:
             strings.append('a')
         strings.append('Kde sme skončili?')
         order = 0
-        self.canvas.create_text(self.x, 100, text=strings[0], tag='description')
+        self.canvas.create_text(self.x, 100, text=strings[0], font=("Mali",14), tag='description')
         self.canvas.create_image(self.x, 150, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
             self.canvas.create_image(self.x, 250 + order * 100, image=self.transport_images[item], tag='description')
-            self.canvas.create_text(self.x, 200 + order * 100, text=strings[order + 1], tag='description')
+            self.canvas.create_text(self.x, 200 + order * 100, text=strings[order + 1], font=("Mali",14), tag='description')
             order += 1
-        self.canvas.create_text(self.x, 100 + (1 + order) * 100, text=strings[-1], tag='description')
+        self.canvas.create_text(self.x, 100 + (1 + order) * 100, text=strings[-1], font=("Mali",14), tag='description')
 
     def write_task_4(self):
         strings = ['Išli sme']
@@ -55,13 +54,13 @@ class TaskDescription:
         strings.append('Kde sme začali?')
         order = 0
         for item in self.transport:
-            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], tag='description')
+            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], font=("Mali",14), tag='description')
             self.canvas.create_image(self.x, 150 + order * 100, image=self.transport_images[item], tag='description')
             order += 1
-        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-2], tag='description')
+        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-2], font=("Mali",14), tag='description')
         self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[self.path[-1]], tag='description')
         order += 1
-        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-1], tag='description')
+        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-1], font=("Mali",14), tag='description')
 
     def clear(self):
         for item in self.canvas.find_withtag('description'):

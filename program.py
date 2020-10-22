@@ -21,9 +21,13 @@ class Main:
     def __init__(self, canvas, file_name=None):
         self.canvas = canvas
         self.random_type = random.randint(1, 4)
+        self.background = tkinter.PhotoImage(file="./textures/bg.png")
+        self.canvas.create_image(965, 540,image=self.background, tag="background")
         self.msg = self.canvas.create_text(1730, 800, text='', font=('Arial', 18))
         self.game = None
         self.buttons_array_names = ["settings", "load", "reset", "close", "check", "save", "editor", "delete"]
+
+
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
