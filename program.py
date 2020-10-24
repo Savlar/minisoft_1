@@ -84,7 +84,9 @@ class Main:
         self.buttons_id["check"] = self.canvas.create_image(1745, 850, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.canvas.create_image(1755, 50, image=self.title_images["task"], tag="title")
+        self.canvas.create_text(1755, 50, text="Úloha", font=("Mali", 30))
+
+        #self.canvas.create_image(1755, 50, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
             self.canvas.create_image(960, 880, image=self.title_images["path"], tag="title")
         self.canvas.update()
