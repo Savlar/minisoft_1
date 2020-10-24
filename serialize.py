@@ -5,7 +5,9 @@ from tkinter import filedialog
 def save_data(edges, vertices):
     file = filedialog.asksaveasfile("wb", filetypes=[("Serialized python structure",
                                                       "*.pickle")], defaultextension="*.pickle", )
-    pickle.dump([edges, vertices], file)
+
+    if file is not None and not isinstance(file, tuple):
+        pickle.dump([edges, vertices], file)
 
 
 def load_data(file_name):

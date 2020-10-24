@@ -5,12 +5,17 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, mark=False):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, max_transport_units, mark=False):
         self.canvas = canvas
+        self.max_transport_units = max_transport_units
         self.image_size = 60
         self.free = False
         self.vertex_markers = {}
-        self.all_paths = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+        self.all_paths = {}
+
+        for x in range(0,self.max_transport_units):
+            self.all_paths[x] = []
+
         self.path = []
         self.points = []
         self.edges = []
@@ -111,7 +116,7 @@ class Graph:
                 self.find_path(source, dest)
 
     def find_path(self, current, dest):
-        if len(self.path) > 8:
+        if len(self.path) >= self.max_transport_units:
             return
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
