@@ -26,7 +26,7 @@ class Graph:
         self.create_edges()
         self.draw_planets()
         if mark:
-            self.canvas.bind('<Button-3>', self.mark_vertex)
+            self.canvas.bind('<Button-1>', self.mark_vertex)
         self.offset_last_point = 5
 
     def draw_planets(self):

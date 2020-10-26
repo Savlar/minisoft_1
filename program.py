@@ -2,6 +2,7 @@ import random
 import tkinter
 from tkinter import filedialog
 
+
 from editor import TaskEditor
 from graph import Graph
 from serialize import load_data
@@ -160,6 +161,12 @@ class Main:
                 self.save_map()
             else:
                 print('Wrong map')
+
+        elif self.buttons_id["back"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["back"]):
+            if self.te is not None:
+                self.te.close()
+            self.te = None
+            self.reset()
 
     def check_path(self):
         if self.random_type in [3, 4]:
