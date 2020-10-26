@@ -111,7 +111,7 @@ class Main:
                 self.canvas.itemconfig(self.buttons_id[buttonsName], image=self.buttons_basic_images[buttonsName])
 
     def browse_file(self):
-        self.file_name = filedialog.askopenfilename(initialdir="/",
+        self.file_name = filedialog.askopenfilename(initialdir="./misc",
                                                     title="Select a File",
                                                     filetypes=(("Serialized python structure",
                                                                 "*.pickle*"),
@@ -134,7 +134,7 @@ class Main:
             self.g.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
-            self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images)
+            self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):

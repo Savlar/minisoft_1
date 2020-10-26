@@ -7,8 +7,8 @@ from serialize import save_data
 
 class TaskEditor(Graph):
 
-    def __init__(self, canvas, planets_images, transport_images):
-        super(TaskEditor, self).__init__(canvas, planets_images, transport_images)
+    def __init__(self, canvas, planets_images, transport_images,max_transport_units):
+        super(TaskEditor, self).__init__(canvas, planets_images, transport_images, max_transport_units)
         self.saved = False
         self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
         self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
