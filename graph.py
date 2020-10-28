@@ -14,7 +14,7 @@ class Graph:
         self.all_paths = {}
 
         self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'tesla_small', 3: 'ufo_tesla_small',
-                        4: 'rocket_tesla_small', 5: 'rocket_ufo_tesla_small'}
+                            4: 'rocket_tesla_small', 5: 'rocket_ufo_tesla_small'}
 
         for x in range(0, self.max_transport_units):
             self.all_paths[x] = []
@@ -53,7 +53,8 @@ class Graph:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
                 edge.image.add_image_info(self.canvas.create_image(x, y,
-                                                                   image=self.transport_images[self.image_names[t]][1], tag='graph'), (x, y), t)
+                                                                   image=self.transport_images[self.image_names[t]][1],
+                                                                   tag='graph'), (x, y), t)
 
     def create_edges(self):
         for vertex in self.vertices:
@@ -117,7 +118,7 @@ class Graph:
     def generate_paths(self):
         self.all_paths = {k: [] for k in self.all_paths}
         self.all_paths[0] = [(['mercury'], []), (['venus'], []), (['earth'], []), (['mars'], []),
-                              (['jupiter'], []), (['saturn'], []), (['uranus'], []), (['neptune'], [])]
+                             (['jupiter'], []), (['saturn'], []), (['uranus'], []), (['neptune'], [])]
         for source in self.vertices:
             for dest in self.vertices:
                 self.path = []
@@ -145,4 +146,3 @@ class Graph:
     def remove_marker(self):
         self.delete_items(list(x[0] for x in self.vertex_markers.values()))
         self.vertex_markers = {}
-

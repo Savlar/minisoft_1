@@ -7,8 +7,15 @@ from serialize import save_data
 
 class GraphEditor(Graph):
 
-    def __init__(self, canvas, planets_images, transport_images,max_transport_units):
-        super(GraphEditor, self).__init__(canvas, planets_images, transport_images, max_transport_units)
+    def __init__(self, canvas, planets_images, transport_images, max_transport_units, parent=None):
+        if parent is not None:
+            self.canvas = parent.canvas
+            self.edges = parent.edges
+            self.transport_images = parent.transport_images
+            self.max_transport_units = parent.max_transport_units
+            self.image_names = parent.image_names
+        else:
+            super(GraphEditor, self).__init__(canvas, planets_images, transport_images, max_transport_units)
         self.saved = False
         self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
         self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
@@ -24,8 +31,9 @@ class GraphEditor(Graph):
                 x, y = edge.image.image_coords
                 t = edge.image.img_type + 1 if edge.image.img_type < len(self.image_names.keys()) - 1 else 0
                 self.delete_items(edge.image.image)
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[self.image_names[t]][1],
-                                                                   tag="change_transport_unit"), (x, y), t)
+                edge.image.add_image_info(
+                    self.canvas.create_image(x, y, image=self.transport_images[self.image_names[t]][1],
+                                             tag="change_transport_unit"), (x, y), t)
                 break
 
     def save(self):
