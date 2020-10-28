@@ -5,12 +5,11 @@ class TaskDescription:
 
     def __init__(self, canvas, task_info, planets_images, transport_images):
         self.canvas: tkinter.Canvas = canvas
-        self.x = 1750
+        self.x = 1180
         self.planets_images = planets_images
         self.transport_images = transport_images
         self.task_info = task_info
         self.task_type = self.task_info['type']
-        self.from_image = tkinter.PhotoImage(file="./textures/texts/from.png")
         self.path = self.task_info['path'][:]
         if self.task_type == 1:
             self.path = [self.path[0], self.path[-1]]
@@ -28,8 +27,8 @@ class TaskDescription:
         strings.append('do')
         order = 0
         for item in self.path:
-            self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[item], tag='description')
-            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], font=("Alfa Slab One",14), tag='description')
+            self.canvas.create_image(self.x, 100 + order * 70, image=self.planets_images[item], tag='description')
+            self.canvas.create_text(self.x, 70 + order * 70, text=strings[order], font=("Alfa Slab One",11), tag='description')
             order += 1
 
     def write_task_3(self):
@@ -38,13 +37,13 @@ class TaskDescription:
             strings.append('a')
         strings.append('Kde sme skončili?')
         order = 0
-        self.canvas.create_text(self.x, 100, text=strings[0], font=("Alfa Slab One",14), tag='description')
-        self.canvas.create_image(self.x, 150, image=self.planets_images[self.path[0]], tag='description')
+        self.canvas.create_text(self.x, 70, text=strings[0], font=("Alfa Slab One",11), tag='description')
+        self.canvas.create_image(self.x, 100, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
-            self.canvas.create_image(self.x, 250 + order * 100, image=self.transport_images[item], tag='description')
-            self.canvas.create_text(self.x, 200 + order * 100, text=strings[order + 1], font=("Alfa Slab One",14), tag='description')
+            self.canvas.create_image(self.x, 150 + order * 70, image=self.transport_images[item], tag='description')
+            self.canvas.create_text(self.x, 136 + order * 70, text=strings[order + 1], font=("Alfa Slab One",11), tag='description')
             order += 1
-        self.canvas.create_text(self.x, 100 + (1 + order) * 100, text=strings[-1], font=("Alfa Slab One",14), tag='description')
+        self.canvas.create_text(self.x, 50 + (1 + order) * 48, text=strings[-1], font=("Alfa Slab One",11), tag='description')
 
     def write_task_4(self):
         strings = ['Išli sme']
@@ -54,13 +53,13 @@ class TaskDescription:
         strings.append('Kde sme začali?')
         order = 0
         for item in self.transport:
-            self.canvas.create_text(self.x, 100 + order * 100, text=strings[order], font=("Alfa Slab One",14), tag='description')
-            self.canvas.create_image(self.x, 150 + order * 100, image=self.transport_images[item], tag='description')
+            self.canvas.create_text(self.x, 70 + order * 70, text=strings[order], font=("Alfa Slab One",11), tag='description')
+            self.canvas.create_image(self.x, 100 + order * 70, image=self.transport_images[item], tag='description')
             order += 1
-        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-2], font=("Alfa Slab One",14), tag='description')
-        self.canvas.create_image(self.x, 150 + order * 100, image=self.planets_images[self.path[-1]], tag='description')
+        self.canvas.create_text(self.x, 70 + order * 70, text=strings[-2], font=("Alfa Slab One",11), tag='description')
+        self.canvas.create_image(self.x, 100 + order * 70, image=self.planets_images[self.path[-1]], tag='description')
         order += 1
-        self.canvas.create_text(self.x, 100 + order * 100, text=strings[-1], font=("Alfa Slab One",14), tag='description')
+        self.canvas.create_text(self.x, 70 + order * 70, text=strings[-1], font=("Alfa Slab One",11), tag='description')
 
     def clear(self):
         for item in self.canvas.find_withtag('description'):

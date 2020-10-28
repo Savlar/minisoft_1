@@ -3,7 +3,7 @@ import tkinter
 from tkinter import filedialog
 
 
-from editor import TaskEditor
+from editor import GraphEditor
 from graph import Graph
 from serialize import load_data
 from task_description import TaskDescription
@@ -12,7 +12,7 @@ from task_description import TaskDescription
 class Program:
     def __init__(self):
         win = tkinter.Tk()
-        self.canvas = tkinter.Canvas(master=win, height=1080, width=1920, bg='grey')
+        self.canvas = tkinter.Canvas(master=win, height=720, width=1280, bg='grey')
         self.canvas.pack()
         Main(self.canvas)
         win.mainloop()
@@ -24,7 +24,7 @@ class Main:
         self.random_type = random.randint(1, 4)
         self.max_transport_units = 8
         self.background = tkinter.PhotoImage(file="./textures/bg.png")
-        self.canvas.create_image(965, 540,image=self.background, tag="background")
+        self.canvas.create_image(640, 360,image=self.background, tag="background")
         self.msg = self.canvas.create_text(1730, 800, text='', font=("Alfa Slab One", 18))
         self.game = None
         self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back"]
@@ -41,9 +41,11 @@ class Main:
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus"])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
-                                                                  ["rocket", "ufo", "rocket_small", "ufo_small", "both", "both_small"])
+                                                                  ["rocket", "ufo", "rocket_small", "ufo_small", "rocket_ufo_tesla_small", 'tesla_small',
+                                                                   'ufo_tesla_small','rocket_tesla_small', 'tesla'])
 
-        self.title_images = self.create_dictionary_for_images("textures/titles/", ["path", "task","task_type","difficulty"])
+        self.title_images = self.create_dictionary_for_images("textures/titles/",
+                                                              ["path", "task", "task_type", "difficulty"])
 
         self.buttons_id = {}
 
@@ -51,24 +53,24 @@ class Main:
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
 
-        self.te = None
+        self.graph_editor = None
 
-        self.g = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units, self.random_type > 2)
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units, self.random_type > 2)
 
         self.file_name = file_name
         x = load_data(self.file_name)
-        self.g.load(x)
-        self.g.generate_paths()
+        self.graph.load(x)
+        self.graph.generate_paths()
         while True:
             self.random_length = random.randint(2, 6)
-            if len(self.g.all_paths[self.random_length]) == 0:
+            if len(self.graph.all_paths[self.random_length]) == 0:
                 continue
-            self.random_path = random.randint(0, len(self.g.all_paths[self.random_length]) - 1)
+            self.random_path = random.randint(0, len(self.graph.all_paths[self.random_length]) - 1)
             break
         if self.random_type in [1, 2]:
             self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
-        task_info = {'type': self.random_type, 'path': self.g.all_paths[self.random_length][self.random_path][0],
-                     'transport': self.g.all_paths[self.random_length][self.random_path][1]}
+        task_info = {'type': self.random_type, 'path': self.graph.all_paths[self.random_length][self.random_path][0],
+                     'transport': self.graph.all_paths[self.random_length][self.random_path][1]}
         self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
 
     @staticmethod
@@ -82,16 +84,16 @@ class Main:
     def create_buttons(self):
         y = 50
         for buttonName in ["load", "editor", "reset", "close"]:
-            self.buttons_id[buttonName] = self.canvas.create_image(170, y,
+            self.buttons_id[buttonName] = self.canvas.create_image(110, y,
                                                                    image=self.buttons_basic_images[buttonName],
                                                                    tag="button")
-            y += 65
-        self.buttons_id["check"] = self.canvas.create_image(1745, 850, image=self.buttons_basic_images["check"],
+            y += 40
+        self.buttons_id["check"] = self.canvas.create_image(1170, 600, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.canvas.create_image(1755, 50, image=self.title_images["task"], tag="title")
+        self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
-            self.canvas.create_image(960, 880, image=self.title_images["path"], tag="title")
+            self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
         self.canvas.update()
 
     def remove_objects_with_tag(self,tag):
@@ -99,9 +101,9 @@ class Main:
             self.canvas.delete(item)
 
     def create_editor_buttons(self):
-        self.buttons_id["save"] = self.canvas.create_image(170, 500, image=self.buttons_basic_images["save"],
+        self.buttons_id["save"] = self.canvas.create_image(110, 240, image=self.buttons_basic_images["save"],
                                                            tag="button")
-        self.buttons_id["back"] = self.canvas.create_image(170, 560, image=self.buttons_basic_images["back"],
+        self.buttons_id["back"] = self.canvas.create_image(110, 280, image=self.buttons_basic_images["back"],
                                                            tag="button")
 
     def filled_button(self, event):
@@ -129,24 +131,24 @@ class Main:
 
     def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
-            if self.te is not None:
+            if self.graph_editor is not None:
                 return
             self.change_text('')
-            self.g.delete_all()
+            self.graph.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
-            self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
+            self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
-            if self.te is not None:
-                self.te.close()
+            if self.graph_editor is not None:
+                self.graph_editor.close()
             self.browse_file()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
-            if self.te is not None:
-                self.te.close()
-                self.te = None
+            if self.graph_editor is not None:
+                self.graph_editor.close()
+                self.graph_editor = None
             self.reset()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["close"]):
@@ -157,52 +159,52 @@ class Main:
 
         elif self.buttons_id["save"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["save"]):
-            if self.te.correct_map():
+            if self.graph_editor.correct_map():
                 self.save_map()
             else:
                 print('Wrong map')
 
         elif self.buttons_id["back"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["back"]):
-            if self.te is not None:
-                self.te.close()
-            self.te = None
+            if self.graph_editor is not None:
+                self.graph_editor.close()
+            self.graph_editor = None
             self.reset()
 
     def check_path(self):
         if self.random_type in [3, 4]:
-            selected = list(self.g.vertex_markers.keys())
+            selected = list(self.graph.vertex_markers.keys())
             try:
                 selected = selected[0].name
             except IndexError:
                 self.change_text('Nebola vybraná planéta')
                 return
             if self.random_type == 3:
-                for path in self.g.all_paths[self.random_length]:
-                    if path[1] == self.g.all_paths[self.random_length][self.random_path][1] and path[0][-1] == selected\
-                            and path[0][0] == self.g.all_paths[self.random_length][self.random_path][0][0]:
+                for path in self.graph.all_paths[self.random_length]:
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][-1] == selected\
+                            and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.change_text(self.good_solution)
                         return
                 self.change_text(self.bad_solution)
             if self.random_type == 4:
-                for path in self.g.all_paths[self.random_length]:
-                    if path[1] == self.g.all_paths[self.random_length][self.random_path][1] and path[0][0] == selected\
-                            and path[0][-1] == self.g.all_paths[self.random_length][self.random_path][0][-1]:
+                for path in self.graph.all_paths[self.random_length]:
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][0] == selected\
+                            and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.change_text(self.good_solution)
                         return
                 self.change_text(self.bad_solution)
         elif self.random_type == 1:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
-            source = self.g.all_paths[self.random_length][self.random_path][0][0]
-            destination = self.g.all_paths[self.random_length][self.random_path][0][-1]
-            for path in self.g.all_paths[len(selected_transport)]:
+            source = self.graph.all_paths[self.random_length][self.random_path][0][0]
+            destination = self.graph.all_paths[self.random_length][self.random_path][0][-1]
+            for path in self.graph.all_paths[len(selected_transport)]:
                 if path[0][0] == source and path[0][-1] == destination and path[1] == selected_transport:
                     self.change_text(self.good_solution)
                     return
             self.change_text(self.bad_solution)
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
-            for path in self.g.all_paths[len(selected_transport)]:
-                if path[1] == selected_transport and self.g.all_paths[self.random_length][self.random_path][0] == path[
+            for path in self.graph.all_paths[len(selected_transport)]:
+                if path[1] == selected_transport and self.graph.all_paths[self.random_length][self.random_path][0] == path[
                     0]:
                     self.change_text(self.good_solution)
                     return
@@ -219,7 +221,7 @@ class Main:
         return list_transport_units
 
     def save_map(self):
-        self.te.save()
+        self.graph_editor.save()
 
     def clean_main_menu(self):
         self.canvas.delete("all")
@@ -241,7 +243,7 @@ class Game:
         self.transport_units = transport_units
         self.transport_units_objects = []
         self.results_transport_units = []
-        self.place_for_results_transport_units = self.canvas.create_rectangle(400, 850, 1545, 1000, tag="units_place")
+        self.place_for_results_transport_units = self.canvas.create_rectangle(250, 580, 1050, 680, tag="units_place")
         self.results_rectangle_coords = self.canvas.coords(self.place_for_results_transport_units)
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
@@ -315,10 +317,10 @@ class Game:
 
     def append_to_results_transport_unit(self, kind):
         self.results_transport_units.append(
-            (kind, self.canvas.create_image(475 + len(self.results_transport_units) * 110, 930,
+            (kind, self.canvas.create_image(380 + len(self.results_transport_units) * 75, 640,
                                             image=(self.transport_units[
                                                        "rocket"] if kind == 0 else self.transport_units["ufo"] if kind == 1 else
-                                                   self.transport_units["both"]),
+                                                   self.transport_units["tesla"]),
                                             tag="results_clickable")))
 
     def remove_selected_objects(self):
@@ -333,9 +335,9 @@ class Game:
 
     def create_transport_units(self):
         self.transport_units_objects.append(
-            self.canvas.create_image(1745, 910, image=self.transport_units["rocket"], tag="movable"))
+            self.canvas.create_image(1165, 640, image=self.transport_units["rocket"], tag="movable"))
         self.transport_units_objects.append(
-            self.canvas.create_image(1755, 970, image=self.transport_units["ufo"], tag="movable"))
+            self.canvas.create_image(1170, 680, image=self.transport_units["ufo"], tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()

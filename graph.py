@@ -34,7 +34,7 @@ class Graph:
             self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
-        coords = [(960, 100), (660, 250), (1260, 250), (360, 400), (1560, 400), (660, 550), (1260, 550), (960, 700)]
+        coords = [(560, 80), (360, 190), (760, 190), (300, 340), (800, 340), (260, 490), (550, 360), (460, 560)]
         planets = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']
         for i in range(len(planets)):
             self.vertices.append(Vertex(*coords[i], planets[i]))
