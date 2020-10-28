@@ -18,9 +18,9 @@ class Program:
         self.width = self.base_width
         self.height = self.base_height
         self.canvas = tkinter.Canvas(master=root, width=self.width, height=self.height)
-        self.canvas.pack(fill=tkinter.BOTH, expand=tkinter.YES)
+        self.canvas.pack(fill=tkinter.NONE, expand=tkinter.NO)
         self.main = Main(self.canvas, self.width / self.base_width - 0.5, self.height / self.base_height - 0.5)
-        self.canvas.bind('<Configure>', self.on_resize)
+        # self.canvas.bind('<Configure>', self.on_resize)
         root.mainloop()
 
     def on_resize(self, event):
