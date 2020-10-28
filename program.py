@@ -49,8 +49,9 @@ class Main:
         self.canvas.create_image(514, 288,image=self.background, tag="background")
         self.msg = None
         self.game = None
-        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back", '1', '2', '3'
-                                    , '4', '5']
+        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back"]
+        # self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back", '1', '2', '3'
+        #                             , '4', '5']
         self.bad_solution = "Nesprávne riešenie"
         self.good_solution = "Správne riešenie"
 
@@ -158,7 +159,8 @@ class Main:
 
     def create_buttons(self):
         y = 27
-        for buttonName in ["load", "editor", "reset", "close", '1', '2', '3', '4', '5']:
+        # for buttonName in ["load", "editor", "reset", "close", '1', '2', '3', '4', '5']:
+        for buttonName in ["load", "editor", "reset", "close"]:
             self.buttons_id[buttonName] = self.canvas.create_image(90, y,
                                                                    image=self.buttons_basic_images[buttonName][1],
                                                                    tag="button")
@@ -236,6 +238,8 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
+            if self.g is not None:
+                self.g.remove_marker()
             if self.game is not None:
                 self.game.remove_selected_objects()
         elif self.buttons_id["save"] is not None and self.canvas.coords("current") == self.canvas.coords(
