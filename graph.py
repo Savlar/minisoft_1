@@ -13,8 +13,8 @@ class Graph:
         self.vertex_markers = {}
         self.all_paths = {}
 
-        self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'tesla_small', 3: 'ufo_tesla_small',
-                        4: 'rocket_tesla_small', 5: 'rocket_ufo_tesla_small'}
+        self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'banshee_small', 3: 'banshee_ufo_small',
+                        4: 'banshee_rocket_small', 5: 'all_small'}
 
         for x in range(0, self.max_transport_units):
             self.all_paths[x] = []
@@ -129,7 +129,7 @@ class Graph:
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
             transport = []
-            names = {0: 'rocket', 1: 'ufo', 2: 'tesla', 3: 'tesla_ufo', 4: 'tesla_rocket', 5: 'tesla_rocket_ufo'}
+            names = {0: 'rocket', 1: 'ufo', 2: 'banshee', 3: 'banshee_ufo', 4: 'banshee_rocket', 5: 'banshee_ufo_rocket'}
             for edge in self.path:
                 vertices.append(edge.end.name)
                 transport.append(names[edge.get_transport_type()])

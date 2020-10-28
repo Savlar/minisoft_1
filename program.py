@@ -4,7 +4,7 @@ from math import ceil
 from tkinter import filedialog
 
 from PIL import Image, ImageTk
-from editor import GraphEditor
+from editor import TaskEditor
 from graph import Graph
 from serialize import load_data
 from task_description import TaskDescription
@@ -111,8 +111,8 @@ class Main:
                                                                  "saturn", "uranus", "venus", 'pluto', 'moon'])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small",
-                                                                   "rocket_ufo", "rocket_ufo_tesla_small", 'tesla_small', 'ufo_tesla_small',
-                                                                   'rocket_tesla_small', 'tesla'])
+                                                                   "both", "all_small", 'banshee_small', 'banshee_ufo_small',
+                                                                   'banshee_rocket_small', 'banshee'])
 
         self.title_images = self.create_dictionary_for_images("textures/titles/", ["path", "task","task_type","difficulty"])
 
@@ -218,7 +218,7 @@ class Main:
             self.g.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
-            self.te = GraphEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
+            self.te = TaskEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
@@ -278,7 +278,7 @@ class Main:
                         return
                 self.change_text(self.bad_solution)
         elif self.random_type == 1:
-            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
+            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'banshee'
                                   for x in self.get_results_transport_units()]
             source = self.g.all_paths[self.random_length][self.random_path][0][0]
             destination = self.g.all_paths[self.random_length][self.random_path][0][-1]
@@ -288,7 +288,7 @@ class Main:
                     return
             self.change_text(self.bad_solution)
         else:
-            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
+            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'banshee'
                                   for x in self.get_results_transport_units()]
             for path in self.g.all_paths[len(selected_transport)]:
                 if self.g.all_paths[self.random_length][self.random_path][0] == path[0] and \
@@ -388,7 +388,7 @@ class Game:
             kind = 0
 
         if self.canvas.find_withtag("current")[0] == self.transport_units_objects[2]:
-            # tesla
+            # banshee
             kind = 2
 
         self.append_to_results_transport_unit(kind)
@@ -416,7 +416,7 @@ class Game:
         self.results_transport_units.append(
             (kind, self.canvas.create_image(253 + len(self.results_transport_units) * 70, 495,
                                             image=(self.transport_units["rocket"][1] if kind == 0 else
-                                                   self.transport_units["ufo"][1] if kind == 1 else self.transport_units["tesla"][1]),
+                                                   self.transport_units["ufo"][1] if kind == 1 else self.transport_units["banshee"][1]),
                                             tag="results_clickable")))
 
     def remove_selected_objects(self):
@@ -435,7 +435,7 @@ class Game:
         self.transport_units_objects.append(
             self.canvas.create_image(639, 469, image=self.transport_units["ufo"][1], tag="movable"))
         self.transport_units_objects.append(
-            self.canvas.create_image(693, 469, image=self.transport_units["tesla"][1], tag="movable"))
+            self.canvas.create_image(693, 469, image=self.transport_units["banshee"][1], tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()
