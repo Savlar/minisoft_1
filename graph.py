@@ -8,15 +8,12 @@ class Graph:
     def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, max_transport_units, mark=False):
         self.canvas = canvas
         self.max_transport_units = max_transport_units
-        self.image_size = 32
+        self.image_size = 60
         self.free = False
         self.vertex_markers = {}
         self.all_paths = {}
 
-        self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'banshee_small', 3: 'banshee_ufo_small',
-                        4: 'banshee_rocket_small', 5: 'all_small'}
-
-        for x in range(0, self.max_transport_units):
+        for x in range(0,self.max_transport_units):
             self.all_paths[x] = []
 
         self.path = []
@@ -28,19 +25,17 @@ class Graph:
         self.create_vertices()
         self.create_edges()
         self.draw_planets()
-        self.canvas.unbind('<Button-1>')
         if mark:
             self.canvas.bind('<Button-1>', self.mark_vertex)
         self.offset_last_point = 5
 
     def draw_planets(self):
         for vertex in self.vertices:
-            self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name][1], tag="draw_ground")
+            self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
-        coords = [(515, 40), (352, 107), (672, 107), (192, 213), (1560, 213), (352, 320), (672, 320), (512, 386),
-                  (432, 213), (592, 213)]
-        planets = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'moon']
+        coords = [(960, 100), (660, 250), (1260, 250), (360, 400), (1560, 400), (660, 550), (1260, 550), (960, 700)]
+        planets = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']
         for i in range(len(planets)):
             self.vertices.append(Vertex(*coords[i], planets[i]))
 
@@ -52,8 +47,8 @@ class Graph:
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
-                edge.image.add_image_info(self.canvas.create_image(x, y,
-                                                                   image=self.transport_images[self.image_names[t]][1], tag='graph'), (x, y), t)
+                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[
+                    'ufo_small' if t == 1 else 'rocket_small']), (x, y), t)
 
     def create_edges(self):
         for vertex in self.vertices:
@@ -62,7 +57,7 @@ class Graph:
                     self.edges.append(Edge(vertex, neighbour))
 
     def find_edge(self, start, end):
-        area = 20
+        area = 35
         for edge in self.edges:
             if edge.connected_nodes(start[0], start[1], end[0], end[1], area):
                 return edge
@@ -126,10 +121,9 @@ class Graph:
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
             transport = []
-            names = {0: 'rocket', 1: 'ufo', 2: 'banshee', 3: 'banshee_ufo', 4: 'banshee_rocket', 5: 'banshee_ufo_rocket'}
             for edge in self.path:
                 vertices.append(edge.end.name)
-                transport.append(names[edge.get_transport_type()])
+                transport.append('rocket' if edge.get_transport_type() == 0 else 'ufo')
             self.all_paths[len(transport)].append((vertices, transport))
             return
         else:
