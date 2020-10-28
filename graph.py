@@ -30,7 +30,7 @@ class Graph:
         self.draw_planets()
         self.canvas.unbind('<Button-1>')
         if mark:
-            self.canvas.bind('<Button-1>', self.mark_vertex)
+            self.canvas.tag_bind('draw_ground', '<Button-1>', self.mark_vertex)
         self.offset_last_point = 5
 
     def draw_planets(self):
@@ -77,11 +77,14 @@ class Graph:
                                                                outline='red'), text, order]
 
     def mark_vertex(self, e):
+        previously_marked = None
         if not self.free:
-            self.delete_items(list(x[0] for x in self.vertex_markers.values()))
-            self.vertex_markers = {}
+            previously_marked = list(self.vertex_markers.keys())[0] if len(self.vertex_markers.keys()) > 0 else None
+            self.remove_marker()
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
+                if previously_marked is not None and previously_marked == vertex:
+                    return
                 try:
                     self.delete_items(self.vertex_markers[vertex][0])
                     self.delete_items(self.vertex_markers[vertex][1])
@@ -138,3 +141,8 @@ class Graph:
                     self.path.append(edge)
                     self.find_path(edge.end, dest)
                     self.path.pop()
+
+    def remove_marker(self):
+        self.delete_items(list(x[0] for x in self.vertex_markers.values()))
+        self.vertex_markers = {}
+
