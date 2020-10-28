@@ -15,8 +15,12 @@ class Program:
         root = tkinter.Tk()
         self.base_width = 1024
         self.base_height = 576
-        self.width = self.base_width
-        self.height = self.base_height
+
+        current_screen_width = root.winfo_screenwidth()
+        current_screen_height = root.winfo_screenheight()
+
+        self.width = current_screen_width if current_screen_width <= 1920 else 1920
+        self.height = current_screen_height if current_screen_height <= 1080 else 1080
         self.canvas = tkinter.Canvas(master=root, width=self.width, height=self.height)
         self.canvas.pack(fill=tkinter.BOTH, expand=tkinter.YES)
         self.main = Main(self.canvas, self.width / self.base_width - 0.5, self.height / self.base_height - 0.5)
@@ -82,7 +86,7 @@ class Main:
         self.graph_editor = None
 
         self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units,
-                       self.random_type > 2)
+                           self.random_type > 2)
 
         x = load_data(self.file_name)
         self.graph.load(x)
@@ -218,7 +222,8 @@ class Main:
             self.graph.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
-            self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images, self.max_transport_units, self.graph)
+            self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,
+                                            self.max_transport_units, self.graph)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
@@ -265,14 +270,16 @@ class Main:
                 return
             if self.random_type == 3:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][-1] == selected \
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
+                        -1] == selected \
                             and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.change_text(self.good_solution)
                         return
                 self.change_text(self.bad_solution)
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][0] == selected \
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
+                        0] == selected \
                             and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.change_text(self.good_solution)
                         return
