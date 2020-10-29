@@ -2,7 +2,6 @@ import random
 import tkinter
 from tkinter import filedialog
 
-
 from editor import GraphEditor
 from graph import Graph
 from serialize import load_data
@@ -24,14 +23,12 @@ class Main:
         self.random_type = random.randint(1, 4)
         self.max_transport_units = 8
         self.background = tkinter.PhotoImage(file="./textures/bg.png")
-        self.canvas.create_image(640, 360,image=self.background, tag="background")
+        self.canvas.create_image(640, 360, image=self.background, tag="background")
         self.msg = self.canvas.create_text(1730, 800, text='', font=("Alfa Slab One", 18))
         self.game = None
         self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back"]
         self.bad_solution = "Nesprávne riešenie"
         self.good_solution = "Správne riešenie"
-
-
 
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
@@ -41,8 +38,9 @@ class Main:
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus"])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
-                                                                  ["rocket", "ufo", "rocket_small", "ufo_small", "rocket_ufo_tesla_small", 'tesla_small',
-                                                                   'ufo_tesla_small','rocket_tesla_small', 'tesla'])
+                                                                  ["rocket", "ufo", "rocket_small", "ufo_small",
+                                                                   "rocket_ufo_tesla_small", 'tesla_small',
+                                                                   'ufo_tesla_small', 'rocket_tesla_small', 'tesla'])
 
         self.title_images = self.create_dictionary_for_images("textures/titles/",
                                                               ["path", "task", "task_type", "difficulty"])
@@ -55,7 +53,8 @@ class Main:
 
         self.graph_editor = None
 
-        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units, self.random_type > 2)
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units,
+                           self.random_type > 2)
 
         self.file_name = file_name
         x = load_data(self.file_name)
@@ -88,15 +87,18 @@ class Main:
                                                                    image=self.buttons_basic_images[buttonName],
                                                                    tag="button")
             y += 40
-        self.buttons_id["check"] = self.canvas.create_image(1170, 600, image=self.buttons_basic_images["check"],
+        self.buttons_id["check"] = self.canvas.create_image(1170, 540, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
         self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
             self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
+
+            self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
+                                                                 tag="button")
         self.canvas.update()
 
-    def remove_objects_with_tag(self,tag):
+    def remove_objects_with_tag(self, tag):
         for item in self.canvas.find_withtag(tag):
             self.canvas.delete(item)
 
@@ -126,7 +128,6 @@ class Main:
         self.canvas.delete(self.buttons_id["check"])
         self.remove_objects_with_tag('title')
         if self.game:
-            self.canvas.delete(self.game.place_for_results_transport_units)
             self.game.clean_transport_units_objects()
 
     def buttons_action(self, event):
@@ -137,7 +138,8 @@ class Main:
             self.graph.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
-            self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,self.max_transport_units)
+            self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,
+                                            self.max_transport_units)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
@@ -157,6 +159,10 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
 
+        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
+            if self.game is not None:
+                self.game.remove_selected_objects()
+
         elif self.buttons_id["save"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["save"]):
             if self.graph_editor.correct_map():
@@ -164,11 +170,19 @@ class Main:
             else:
                 print('Wrong map')
 
-        elif self.buttons_id["back"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["back"]):
+        elif self.buttons_id["back"] is not None and self.canvas.coords("current") == self.canvas.coords(
+                self.buttons_id["back"]):
             if self.graph_editor is not None:
                 self.graph_editor.close()
             self.graph_editor = None
             self.reset()
+
+    @staticmethod
+    def equal_paths(user_path, generated_path):
+        for i in range(len(user_path)):
+            if user_path[i] not in generated_path[i]:
+                return False
+        return True
 
     def check_path(self):
         if self.random_type in [3, 4]:
@@ -180,20 +194,23 @@ class Main:
                 return
             if self.random_type == 3:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][-1] == selected\
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
+                        -1] == selected \
                             and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.change_text(self.good_solution)
                         return
                 self.change_text(self.bad_solution)
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][0] == selected\
+                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
+                        0] == selected \
                             and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.change_text(self.good_solution)
                         return
                 self.change_text(self.bad_solution)
         elif self.random_type == 1:
-            selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
+            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
+                                  for x in self.get_results_transport_units()]
             source = self.graph.all_paths[self.random_length][self.random_path][0][0]
             destination = self.graph.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.graph.all_paths[len(selected_transport)]:
@@ -204,8 +221,8 @@ class Main:
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
             for path in self.graph.all_paths[len(selected_transport)]:
-                if path[1] == selected_transport and self.graph.all_paths[self.random_length][self.random_path][0] == path[
-                    0]:
+                if self.graph.all_paths[self.random_length][self.random_path][0] == path[0] and \
+                        self.equal_paths(selected_transport, path[1]):
                     self.change_text(self.good_solution)
                     return
             self.change_text(self.bad_solution)
@@ -243,8 +260,7 @@ class Game:
         self.transport_units = transport_units
         self.transport_units_objects = []
         self.results_transport_units = []
-        self.place_for_results_transport_units = self.canvas.create_rectangle(250, 580, 1050, 680, tag="units_place")
-        self.results_rectangle_coords = self.canvas.coords(self.place_for_results_transport_units)
+        self.results_rectangle_coords = (250, 580, 1050, 680)
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
         self.click_units = self.canvas.tag_bind("movable", "<Button-1>", self.add_transport_unit_on_click)
@@ -266,7 +282,7 @@ class Game:
 
                 self.canvas.delete(transport_unit[1])
                 index = self.results_transport_units.index(transport_unit)
-                self.results_transport_units[index] = (kind,None)
+                self.results_transport_units[index] = (kind, None)
 
         self.remake_results_transport_units_objects()
 
@@ -307,11 +323,15 @@ class Game:
             if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
                 kind = 0
 
-            if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 1110 >= \
+            if self.canvas.find_withtag("current")[0] == self.transport_units_objects[2]:
+                # tesla
+                kind = 2
+
+            if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 800 >= \
                     current_coords[
-                        0] and self.results_rectangle_coords[0] - 1110 <= current_coords[
-                0] and self.results_rectangle_coords[1] + 150 >= current_coords[1] >= self.results_rectangle_coords[
-                1] - 150:
+                        0] and self.results_rectangle_coords[0] - 5 <= current_coords[
+                0] and self.results_rectangle_coords[1] + 100 >= current_coords[1] >= self.results_rectangle_coords[
+                1] - 30:
                 self.append_to_results_transport_unit(kind)
         self.remake_transport_units_objects()
 
@@ -319,8 +339,9 @@ class Game:
         self.results_transport_units.append(
             (kind, self.canvas.create_image(380 + len(self.results_transport_units) * 75, 640,
                                             image=(self.transport_units[
-                                                       "rocket"] if kind == 0 else self.transport_units["ufo"] if kind == 1 else
-                                                   self.transport_units["tesla"]),
+                                                       "rocket"] if kind == 0 else self.transport_units[
+                                                "ufo"] if kind == 1 else
+                                            self.transport_units["tesla"]),
                                             tag="results_clickable")))
 
     def remove_selected_objects(self):
@@ -335,9 +356,11 @@ class Game:
 
     def create_transport_units(self):
         self.transport_units_objects.append(
-            self.canvas.create_image(1165, 640, image=self.transport_units["rocket"], tag="movable"))
+            self.canvas.create_image(1165, 620, image=self.transport_units["rocket"], tag="movable"))
         self.transport_units_objects.append(
-            self.canvas.create_image(1170, 680, image=self.transport_units["ufo"], tag="movable"))
+            self.canvas.create_image(1170, 655, image=self.transport_units["ufo"], tag="movable"))
+        self.transport_units_objects.append(
+            self.canvas.create_image(1170, 690, image=self.transport_units["tesla"], tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()
