@@ -18,7 +18,7 @@ class Program:
 
 
 class Main:
-    def __init__(self, canvas, file_name=None):
+    def __init__(self, canvas: tkinter.Canvas, file_name=None):
         self.canvas = canvas
         self.random_type = random.randint(1, 4)
         self.max_transport_units = 8
@@ -30,7 +30,8 @@ class Main:
                                     , '4', '5']
         self.bad_solution = "Nesprávne riešenie"
         self.good_solution = "Správne riešenie"
-
+        self.selected_task_types = ['1', '2', '3', '4']
+        self.solved_tasks = {'1': 0, '2': 0, '3': 0, '4': 0}
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
         self.buttons_filled_images = self.create_dictionary_for_images("textures/buttons/filled/",
@@ -51,27 +52,63 @@ class Main:
         self.create_buttons()
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
-
+        self.buttons_task_type_bind = self.canvas.tag_bind('task_types', '<Button-1>', self.task_buttons_action)
         self.graph_editor = None
-
-        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units,
-                           self.random_type > 2)
+        self.task = None
+        self.random_length = self.random_path = self.random_type = None
+        self.graph = Graph(self.canvas, self.planets_images, self.transport_images, self.max_transport_units)
 
         self.file_name = file_name
         x = load_data(self.file_name)
         self.graph.load(x)
         self.graph.generate_paths()
+        self.generate_task()
+
+    def generate_task(self):
+        self.graph.remove_all_markers()
+        if self.game is not None:
+            self.canvas.delete('movable')
+            self.game.remove_selected_objects()
+            self.game = None
+        self.graph.free = False
+        self.random_type = int(random.choice(self.selected_task_types))
+        self.create_titles()
+        type_solutions = self.solved_tasks[str(self.random_type)]
+        if type_solutions == 0:
+            self.random_length = random.randint(1, 3)
+        elif type_solutions == 1:
+            self.random_length = random.randint(4, 5)
+        elif type_solutions == 2:
+            self.random_length = random.randint(6, 7)
+        else:
+            self.random_length = random.randint(8, 10)
         while True:
-            self.random_length = random.randint(2, 6)
             if len(self.graph.all_paths[self.random_length]) == 0:
+                self.random_length -= 1
                 continue
             self.random_path = random.randint(0, len(self.graph.all_paths[self.random_length]) - 1)
             break
         if self.random_type in [1, 2]:
+            self.graph.disallow_marking()
             self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
+        else:
+            self.graph.allow_marking()
         task_info = {'type': self.random_type, 'path': self.graph.all_paths[self.random_length][self.random_path][0],
                      'transport': self.graph.all_paths[self.random_length][self.random_path][1]}
         self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
+
+    def free_task(self):
+        self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
+        self.canvas.delete('description')
+        self.canvas.delete('title')
+        self.graph.allow_marking()
+        self.graph.free = True
+
+    def create_titles(self):
+        self.canvas.delete('title')
+        self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
+        if self.random_type < 3:
+            self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
 
     @staticmethod
     def create_dictionary_for_images(path, image_list):
@@ -91,18 +128,14 @@ class Main:
         self.buttons_id["check"] = self.canvas.create_image(1170, 540, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.buttons_id["delete"] = None
-
-        self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
-        if self.random_type < 3:
-            self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
-
-            self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
-                                                                 tag="button")
-
+        self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
+                                                             tag="button")
         self.canvas.create_image(110, 350, image=self.title_images["task_type"], tag="task_types")
         for num,task_type_number in enumerate(["1","2","3","4","5"]):
-            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num*35, image=self.buttons_basic_images[task_type_number], tag="task_types")
+            image = self.buttons_filled_images[task_type_number] \
+                if task_type_number in self.selected_task_types else self.buttons_basic_images[task_type_number]
+            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num*35, image=image,
+                                                                         tag="task_types")
 
         self.canvas.update()
 
@@ -118,6 +151,7 @@ class Main:
 
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
+            if buttonsName in ['1', '2', '3', '4', '5']: return
             if self.buttons_id[buttonsName] is not None and self.canvas.coords(self.buttons_id[buttonsName]) == self.canvas.coords("current"):
                 self.canvas.itemconfig("current", image=self.buttons_filled_images[buttonsName])
             else:
@@ -130,7 +164,10 @@ class Main:
                                                                 "*.pickle*"),
                                                                ))
         if self.file_name is not None and self.file_name != '' and not isinstance(self.file_name, tuple):
-            self.reset()
+            if self.graph_editor is not None:
+                self.graph_editor.load(load_data(self.file_name))
+            else:
+                self.reset()
 
     def delete_unused_editor_buttons(self):
         self.canvas.delete(self.buttons_id["check"])
@@ -141,6 +178,37 @@ class Main:
         self.remove_objects_with_tag('task_types')
         if self.game:
             self.game.clean_transport_units_objects()
+
+    def task_buttons_action(self, e):
+        if self.canvas.coords("current") == self.canvas.coords(self.buttons_id['5']):
+            self.canvas.itemconfig(self.buttons_id['5'], image=self.buttons_filled_images['5'])
+            self.deselect_task('1', '2', '3', '4')
+            self.selected_task_types = ['5']
+            self.free_task()
+            return
+        for task_id in ['1', '2', '3', '4']:
+            if self.canvas.coords("current") == self.canvas.coords(self.buttons_id[task_id]):
+                image = self.canvas.itemcget(self.buttons_id[task_id], option='image')
+                if image == str(self.buttons_basic_images[task_id]):
+                    self.selected_task_types.append(task_id)
+                    new_image = self.buttons_filled_images[task_id]
+                else:
+                    if len(self.selected_task_types) == 1:
+                        return
+                    self.selected_task_types.remove(task_id)
+                    if int(task_id) == self.random_type:
+                        self.generate_task()
+                    new_image = self.buttons_basic_images[task_id]
+                self.canvas.itemconfig(self.buttons_id[task_id], image=new_image)
+                if '5' in self.selected_task_types:
+                    self.deselect_task('5')
+                    self.generate_task()
+
+    def deselect_task(self, *args):
+        for task in args:
+            if task in self.selected_task_types:
+                self.selected_task_types.remove(task)
+                self.canvas.itemconfig(self.buttons_id[task], image=self.buttons_basic_images[task])
 
     def buttons_action(self, event):
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
@@ -155,8 +223,6 @@ class Main:
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
-            if self.graph_editor is not None:
-                self.graph_editor.close()
             self.browse_file()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):
@@ -170,8 +236,8 @@ class Main:
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
-
         elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
+            self.graph.remove_all_markers()
             if self.game is not None:
                 self.game.remove_selected_objects()
 
@@ -240,7 +306,13 @@ class Main:
             self.change_text(self.bad_solution)
 
     def change_text(self, text):
+        if text == self.good_solution:
+            self.correct_answer()
         self.canvas.itemconfig(self.msg, text=text)
+
+    def correct_answer(self):
+        self.solved_tasks[str(self.random_type)] += 1
+        self.generate_task()
 
     def get_results_transport_units(self):
         list_transport_units = []
@@ -256,11 +328,10 @@ class Main:
         self.canvas.delete("all")
         self.canvas.unbind("<Motion>", self.buttons_bind)
         self.canvas.unbind("<Button-1>", self.buttons_action_bind)
+        self.canvas.unbind('<Button-1>', self.buttons_task_type_bind)
 
     def reset(self):
-        # self.game.remove_selected_objects()
         self.clean_main_menu()
-        self.canvas.unbind_all("<Escape>")
         self.canvas.delete("all")
         Main(self.canvas, self.file_name)
 

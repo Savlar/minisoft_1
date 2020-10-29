@@ -5,7 +5,7 @@ from vertex import Vertex
 
 class Graph:
 
-    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, max_transport_units, mark=False):
+    def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, max_transport_units):
         self.canvas = canvas
         self.max_transport_units = max_transport_units
         self.image_size = 45
@@ -15,7 +15,6 @@ class Graph:
 
         for x in range(0,self.max_transport_units):
             self.all_paths[x] = []
-
         self.path = []
         self.points = []
         self.edges = []
@@ -27,10 +26,13 @@ class Graph:
         self.draw_planets()
         self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'tesla_small', 3: 'ufo_tesla_small',
                             4: 'rocket_tesla_small', 5: 'rocket_ufo_small', 6: 'rocket_ufo_tesla_small'}
-        self.canvas.unbind('<Button-1>')
-        if mark:
-            self.canvas.bind('<Button-1>', self.mark_vertex)
         self.offset_last_point = 5
+
+    def allow_marking(self):
+        self.canvas.bind('<Button-1>', self.mark_vertex)
+
+    def disallow_marking(self):
+        self.canvas.unbind('<Button-1>')
 
     def draw_planets(self):
         for vertex in self.vertices:
@@ -67,10 +69,10 @@ class Graph:
                 return edge
         return None
 
-    def create_marker(self, vertex, order, mark=False):
+    def create_marker(self, vertex, order):
         radius = self.image_size // 2
         text = self.canvas.create_text(vertex.x, vertex.y, text=order, fill='red',
-                                       font=('Arial', 14, 'bold')) if mark else None
+                                       font=('Arial', 14, 'bold')) if self.free else None
         self.vertex_markers[vertex] = [self.canvas.create_oval(vertex.x - radius, vertex.y - radius,
                                                                vertex.x + radius, vertex.y + radius, width=3,
                                                                outline='red'), text, order]
@@ -95,7 +97,7 @@ class Graph:
                     self.vertex_markers.pop(vertex)
                 except KeyError:
                     order = len(self.vertex_markers.keys())
-                    self.create_marker(vertex, order + 1, self.free)
+                    self.create_marker(vertex, order + 1)
 
     def load(self, data):
         self.edges = data[0]
@@ -128,8 +130,8 @@ class Graph:
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
             transport = []
-            names = {0: 'rocket', 1: 'ufo', 2: 'banshee', 3: 'banshee_ufo', 4: 'banshee_rocket',
-                     5: 'banshee_ufo_rocket'}
+            names = {0: 'rocket', 1: 'ufo', 2: 'tesla', 3: 'ufo_tesla', 4: 'rocket_tesla',
+                     5: 'rocket_ufo', 6: 'rocket_ufo_tesla'}
             for edge in self.path:
                 vertices.append(edge.end.name)
                 transport.append(names[edge.get_transport_type()])
@@ -144,4 +146,9 @@ class Graph:
 
     def remove_marker(self):
         self.delete_items(list(x[0] for x in self.vertex_markers.values()))
+        self.vertex_markers = {}
+
+    def remove_all_markers(self):
+        for item in self.vertex_markers.values():
+            self.delete_items(item[0], item[1])
         self.vertex_markers = {}
