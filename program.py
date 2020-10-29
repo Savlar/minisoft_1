@@ -26,22 +26,26 @@ class Main:
         self.canvas.create_image(640, 360, image=self.background, tag="background")
         self.msg = self.canvas.create_text(640, 680, text='', font=("Alfa Slab One", 18))
         self.game = None
-        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back",'1', '2', '3'
-                                    , '4', '5']
-        self.bad_solution = "Nesprávne riešenie"
-        self.good_solution = "Správne riešenie"
+        self.solution_value = False
+        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back", '1', '2', '3'
+            , '4', '5']
+        self.result_solution_images = self.create_dictionary_for_images("textures/titles/",
+                                                                        ["good_solution", "bad_solution", "no_planets"])
         self.selected_task_types = ['1', '2', '3', '4']
         self.solved_tasks = {'1': 0, '2': 0, '3': 0, '4': 0}
         self.buttons_basic_images = self.create_dictionary_for_images("textures/buttons/basic/",
                                                                       self.buttons_array_names)
         self.buttons_filled_images = self.create_dictionary_for_images("textures/buttons/filled/",
                                                                        self.buttons_array_names)
+        self.text_images = self.create_dictionary_for_images("textures/text/",["go_low","go_caps","end_low","where_caps","and_low","through_low","to_low","want_caps","start_on_low"])
+
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus"])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small",
-                                                                   "rocket_ufo_tesla_small", 'tesla_small', 'rocket_ufo_small',
+                                                                   "rocket_ufo_tesla_small", 'tesla_small',
+                                                                   'rocket_ufo_small',
                                                                    'ufo_tesla_small', 'rocket_tesla_small', 'tesla'])
 
         self.title_images = self.create_dictionary_for_images("textures/titles/",
@@ -95,7 +99,7 @@ class Main:
             self.graph.allow_marking()
         task_info = {'type': self.random_type, 'path': self.graph.all_paths[self.random_length][self.random_path][0],
                      'transport': self.graph.all_paths[self.random_length][self.random_path][1]}
-        self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images)
+        self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images, self.text_images)
 
     def free_task(self):
         self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
@@ -106,7 +110,7 @@ class Main:
 
     def create_titles(self):
         self.canvas.delete('title')
-        self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
+        self.canvas.create_image(1180, 40, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
             self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
 
@@ -131,10 +135,10 @@ class Main:
         self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
                                                              tag="button")
         self.canvas.create_image(110, 350, image=self.title_images["task_type"], tag="task_types")
-        for num,task_type_number in enumerate(["1","2","3","4","5"]):
+        for num, task_type_number in enumerate(["1", "2", "3", "4", "5"]):
             image = self.buttons_filled_images[task_type_number] \
                 if task_type_number in self.selected_task_types else self.buttons_basic_images[task_type_number]
-            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num*35, image=image,
+            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num * 35, image=image,
                                                                          tag="task_types")
 
         self.canvas.update()
@@ -152,7 +156,8 @@ class Main:
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
             if buttonsName in ['1', '2', '3', '4', '5']: return
-            if self.buttons_id[buttonsName] is not None and self.canvas.coords(self.buttons_id[buttonsName]) == self.canvas.coords("current"):
+            if self.buttons_id[buttonsName] is not None and self.canvas.coords(
+                    self.buttons_id[buttonsName]) == self.canvas.coords("current"):
                 self.canvas.itemconfig("current", image=self.buttons_filled_images[buttonsName])
             else:
                 self.canvas.itemconfig(self.buttons_id[buttonsName], image=self.buttons_basic_images[buttonsName])
@@ -236,7 +241,8 @@ class Main:
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
-        elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
+        elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(
+                self.buttons_id["delete"]):
             self.graph.remove_all_markers()
             if self.game is not None:
                 self.game.remove_selected_objects()
@@ -262,30 +268,39 @@ class Main:
                 return False
         return True
 
+    def create_result_text_image(self, type_result):
+        for image_object in self.canvas.find_withtag('title_result'):
+            self.canvas.delete(image_object)
+        self.canvas.create_image(640, 680, image=self.result_solution_images[type_result], tag="title_result")
+
     def check_path(self):
         if self.random_type in [3, 4]:
             selected = list(self.graph.vertex_markers.keys())
             try:
                 selected = selected[0].name
             except IndexError:
-                self.change_text('Nebola vybraná planéta')
+                self.create_result_text_image("no_planets")
                 return
             if self.random_type == 3:
                 for path in self.graph.all_paths[self.random_length]:
                     if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
                         -1] == selected \
                             and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
-                        self.change_text(self.good_solution)
+                        self.create_result_text_image("good_solution")
+                        self.solution_value = True
                         return
-                self.change_text(self.bad_solution)
+                self.create_result_text_image("bad_solution")
+                self.solution_value = False
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
                     if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
                         0] == selected \
                             and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
-                        self.change_text(self.good_solution)
+                        self.create_result_text_image("good_solution")
+                        self.solution_value = True
                         return
-                self.change_text(self.bad_solution)
+                self.create_result_text_image("bad_solution")
+                self.solution_value = False
         elif self.random_type == 1:
             selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
                                   for x in self.get_results_transport_units()]
@@ -293,20 +308,24 @@ class Main:
             destination = self.graph.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.graph.all_paths[len(selected_transport)]:
                 if path[0][0] == source and path[0][-1] == destination and path[1] == selected_transport:
-                    self.change_text(self.good_solution)
+                    self.create_result_text_image("good_solution")
+                    self.solution_value = True
                     return
-            self.change_text(self.bad_solution)
+            self.create_result_text_image("bad_solution")
+            self.solution_value = False
         else:
             selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
             for path in self.graph.all_paths[len(selected_transport)]:
                 if self.graph.all_paths[self.random_length][self.random_path][0] == path[0] and \
                         self.equal_paths(selected_transport, path[1]):
-                    self.change_text(self.good_solution)
+                    self.create_result_text_image("good_solution")
+                    self.solution_value = True
                     return
-            self.change_text(self.bad_solution)
+            self.create_result_text_image("bad_solution")
+            self.solution_value = False
 
     def change_text(self, text):
-        if text == self.good_solution:
+        if text == self.solution_value:
             self.correct_answer()
         self.canvas.itemconfig(self.msg, text=text)
 
