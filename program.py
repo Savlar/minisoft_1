@@ -37,7 +37,10 @@ class Main:
                                                                       self.buttons_array_names)
         self.buttons_filled_images = self.create_dictionary_for_images("textures/buttons/filled/",
                                                                        self.buttons_array_names)
-        self.text_images = self.create_dictionary_for_images("textures/text/",["go_low","go_caps","end_low","where_caps","and_low","through_low","to_low","want_caps","start_on_low"])
+        self.text_images = self.create_dictionary_for_images("textures/text/", ["go_low", "go_caps", "end_low",
+                                                                                "where_caps", "and_low", "through_low",
+                                                                                "to_low", "want_caps",
+                                                                                "start_on_low", "where_end_caps"])
 
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
@@ -99,7 +102,8 @@ class Main:
             self.graph.allow_marking()
         task_info = {'type': self.random_type, 'path': self.graph.all_paths[self.random_length][self.random_path][0],
                      'transport': self.graph.all_paths[self.random_length][self.random_path][1]}
-        self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images, self.text_images)
+        self.task = TaskDescription(self.canvas, task_info, self.planets_images, self.transport_images,
+                                    self.text_images)
 
     def free_task(self):
         self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
@@ -155,7 +159,8 @@ class Main:
 
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
-            if buttonsName in ['1', '2', '3', '4', '5']: return
+            if buttonsName in ['1', '2', '3', '4', '5']:
+                continue
             if self.buttons_id[buttonsName] is not None and self.canvas.coords(
                     self.buttons_id[buttonsName]) == self.canvas.coords("current"):
                 self.canvas.itemconfig("current", image=self.buttons_filled_images[buttonsName])
@@ -179,6 +184,7 @@ class Main:
         if self.buttons_id["delete"] is not None:
             self.canvas.delete(self.buttons_id["delete"])
 
+        self.remove_objects_with_tag('title_result')
         self.remove_objects_with_tag('title')
         self.remove_objects_with_tag('task_types')
         if self.game:
@@ -242,6 +248,7 @@ class Main:
             self.check_path()
         elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["delete"]):
+            self.remove_objects_with_tag('title_result')
             self.graph.remove_all_markers()
             if self.game is not None:
                 self.game.remove_selected_objects()
@@ -268,8 +275,7 @@ class Main:
         return True
 
     def create_result_text_image(self, type_result):
-        for image_object in self.canvas.find_withtag('title_result'):
-            self.canvas.delete(image_object)
+        self.remove_objects_with_tag('title_result')
         self.canvas.create_image(640, 680, image=self.result_solution_images[type_result], tag="title_result")
 
     def check_path(self):
