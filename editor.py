@@ -98,7 +98,7 @@ class GraphEditor(Graph):
 
     def correct_map(self):
         self.generate_paths()
-        for i in range(2, 9):
+        for i in range(2, self.max_transport_units):
             if len(self.all_paths[i]) > 0:
                 return True
         return False

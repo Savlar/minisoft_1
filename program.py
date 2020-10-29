@@ -24,9 +24,10 @@ class Main:
         self.max_transport_units = 8
         self.background = tkinter.PhotoImage(file="./textures/bg.png")
         self.canvas.create_image(640, 360, image=self.background, tag="background")
-        self.msg = self.canvas.create_text(1730, 800, text='', font=("Alfa Slab One", 18))
+        self.msg = self.canvas.create_text(640, 680, text='', font=("Alfa Slab One", 18))
         self.game = None
-        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back"]
+        self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back",'1', '2', '3'
+                                    , '4', '5']
         self.bad_solution = "Nesprávne riešenie"
         self.good_solution = "Správne riešenie"
 
@@ -90,12 +91,19 @@ class Main:
         self.buttons_id["check"] = self.canvas.create_image(1170, 540, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
+        self.buttons_id["delete"] = None
+
         self.canvas.create_image(1180, 50, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
             self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
 
             self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
                                                                  tag="button")
+
+        self.canvas.create_image(110, 350, image=self.title_images["task_type"], tag="task_types")
+        for num,task_type_number in enumerate(["1","2","3","4","5"]):
+            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num*35, image=self.buttons_basic_images[task_type_number], tag="task_types")
+
         self.canvas.update()
 
     def remove_objects_with_tag(self, tag):
@@ -110,7 +118,7 @@ class Main:
 
     def filled_button(self, event):
         for buttonsName in self.buttons_id.keys():
-            if self.canvas.coords(self.buttons_id[buttonsName]) == self.canvas.coords("current"):
+            if self.buttons_id[buttonsName] is not None and self.canvas.coords(self.buttons_id[buttonsName]) == self.canvas.coords("current"):
                 self.canvas.itemconfig("current", image=self.buttons_filled_images[buttonsName])
             else:
                 self.canvas.itemconfig(self.buttons_id[buttonsName], image=self.buttons_basic_images[buttonsName])
@@ -126,7 +134,11 @@ class Main:
 
     def delete_unused_editor_buttons(self):
         self.canvas.delete(self.buttons_id["check"])
+        if self.buttons_id["delete"] is not None:
+            self.canvas.delete(self.buttons_id["delete"])
+
         self.remove_objects_with_tag('title')
+        self.remove_objects_with_tag('task_types')
         if self.game:
             self.game.clean_transport_units_objects()
 
@@ -159,7 +171,7 @@ class Main:
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["check"]):
             self.check_path()
 
-        elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
+        elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(self.buttons_id["delete"]):
             if self.game is not None:
                 self.game.remove_selected_objects()
 
