@@ -219,7 +219,6 @@ class Main:
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["editor"]):
             if self.graph_editor is not None:
                 return
-            self.change_text('')
             self.graph.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
@@ -324,14 +323,10 @@ class Main:
             self.create_result_text_image("bad_solution")
             self.solution_value = False
 
-    def change_text(self, text):
-        if text == self.solution_value:
-            self.correct_answer()
-        self.canvas.itemconfig(self.msg, text=text)
-
     def correct_answer(self):
-        self.solved_tasks[str(self.random_type)] += 1
-        self.generate_task()
+        if self.solution_value:
+            self.solved_tasks[str(self.random_type)] += 1
+            self.generate_task()
 
     def get_results_transport_units(self):
         list_transport_units = []
