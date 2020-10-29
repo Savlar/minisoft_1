@@ -21,14 +21,13 @@ class Main:
     def __init__(self, canvas: tkinter.Canvas, file_name=None):
         self.canvas = canvas
         self.random_type = random.randint(1, 4)
-        self.max_transport_units = 8
+        self.max_transport_units = 10
         self.background = tkinter.PhotoImage(file="./textures/bg.png")
         self.canvas.create_image(640, 360, image=self.background, tag="background")
         self.msg = self.canvas.create_text(640, 680, text='', font=("Alfa Slab One", 18))
         self.game = None
-        self.solution_value = False
         self.buttons_array_names = ["load", "reset", "close", "check", "save", "editor", "delete", "back", '1', '2', '3'
-            , '4', '5']
+            , '4', '5', 'next']
         self.result_solution_images = self.create_dictionary_for_images("textures/titles/",
                                                                         ["good_solution", "bad_solution", "no_planets"])
         self.selected_task_types = ['1', '2', '3', '4']
@@ -78,6 +77,7 @@ class Main:
             self.game.remove_selected_objects()
             self.game = None
         self.graph.free = False
+        self.canvas.itemconfig(self.buttons_id['check'], state='normal')
         self.random_type = int(random.choice(self.selected_task_types))
         self.create_titles()
         type_solutions = self.solved_tasks[str(self.random_type)]
@@ -88,7 +88,7 @@ class Main:
         elif type_solutions == 2:
             self.random_length = random.randint(6, 7)
         else:
-            self.random_length = random.randint(8, 10)
+            self.random_length = random.randint(8, 9)
         while True:
             if len(self.graph.all_paths[self.random_length]) == 0:
                 self.random_length -= 1
@@ -97,7 +97,7 @@ class Main:
             break
         if self.random_type in [1, 2]:
             self.graph.disallow_marking()
-            self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
+            self.game = Game(self.canvas, self.transport_images, self.max_transport_units, self.graph.map_transport)
         else:
             self.graph.allow_marking()
         task_info = {'type': self.random_type, 'path': self.graph.all_paths[self.random_length][self.random_path][0],
@@ -106,9 +106,11 @@ class Main:
                                     self.text_images)
 
     def free_task(self):
-        self.game = Game(self.canvas, self.transport_images, self.max_transport_units)
-        self.canvas.delete('description')
+        self.game = Game(self.canvas, self.transport_images, self.max_transport_units, {'tesla', 'ufo', 'rocket'})
         self.canvas.delete('title')
+        self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
+        self.canvas.delete('description')
+        self.canvas.itemconfig(self.buttons_id['check'], state='hidden')
         self.graph.allow_marking()
         self.graph.free = True
 
@@ -252,7 +254,12 @@ class Main:
             self.graph.remove_all_markers()
             if self.game is not None:
                 self.game.remove_selected_objects()
-
+        elif self.buttons_id.get('next') is not None and \
+                self.canvas.coords('current') == self.canvas.coords(self.buttons_id['next']):
+            self.canvas.delete(self.buttons_id['next'])
+            self.buttons_id.pop('next')
+            self.canvas.delete('title_result')
+            self.generate_task()
         elif self.buttons_id["save"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["save"]):
             if self.graph_editor.correct_map():
@@ -275,6 +282,8 @@ class Main:
         return True
 
     def create_result_text_image(self, type_result):
+        if type_result == 'good_solution':
+            self.correct_answer()
         self.remove_objects_with_tag('title_result')
         self.canvas.create_image(640, 680, image=self.result_solution_images[type_result], tag="title_result")
 
@@ -292,47 +301,41 @@ class Main:
                         -1] == selected \
                             and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.create_result_text_image("good_solution")
-                        self.solution_value = True
                         return
                 self.create_result_text_image("bad_solution")
-                self.solution_value = False
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
                     if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
                         0] == selected \
                             and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.create_result_text_image("good_solution")
-                        self.solution_value = True
                         return
                 self.create_result_text_image("bad_solution")
-                self.solution_value = False
         elif self.random_type == 1:
             selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
                                   for x in self.get_results_transport_units()]
             source = self.graph.all_paths[self.random_length][self.random_path][0][0]
             destination = self.graph.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.graph.all_paths[len(selected_transport)]:
-                if path[0][0] == source and path[0][-1] == destination and path[1] == selected_transport:
+                if path[0][0] == source and path[0][-1] == destination and self.equal_paths(selected_transport, path[1]):
                     self.create_result_text_image("good_solution")
-                    self.solution_value = True
                     return
             self.create_result_text_image("bad_solution")
-            self.solution_value = False
         else:
-            selected_transport = ['rocket' if x == 0 else 'ufo' for x in self.get_results_transport_units()]
+            selected_transport = ['rocket' if x == 0 else 'ufo' if x == 1 else 'tesla'
+                                  for x in self.get_results_transport_units()]
             for path in self.graph.all_paths[len(selected_transport)]:
                 if self.graph.all_paths[self.random_length][self.random_path][0] == path[0] and \
                         self.equal_paths(selected_transport, path[1]):
                     self.create_result_text_image("good_solution")
-                    self.solution_value = True
                     return
             self.create_result_text_image("bad_solution")
-            self.solution_value = False
 
     def correct_answer(self):
-        if self.solution_value:
-            self.solved_tasks[str(self.random_type)] += 1
-            self.generate_task()
+        next_button = self.buttons_id.get('next')
+        if next_button is None:
+            self.buttons_id['next'] = self.canvas.create_image(850, 675, image=self.buttons_basic_images['next'], tag='button')
+        self.solved_tasks[str(self.random_type)] += 1
 
     def get_results_transport_units(self):
         list_transport_units = []
@@ -357,8 +360,10 @@ class Main:
 
 
 class Game:
-    def __init__(self, canvas, transport_units, max_transport_units):
+    def __init__(self, canvas, transport_units, max_transport_units, available_transport):
         self.canvas = canvas
+        self.available_transport = list(sorted(available_transport))
+        self.kinds = {'rocket': 0, 'ufo': 1, 'tesla': 2}
         self.max_results_transport_units = max_transport_units
         self.transport_units = transport_units
         self.transport_units_objects = []
@@ -376,12 +381,8 @@ class Game:
         current = self.canvas.find_withtag("current")[0]
         for transport_unit in self.results_transport_units:
             if current == transport_unit[1]:
-                kind = 1
-
-                if transport_unit[0] == 1:
-                    kind = 2
-                if transport_unit[0] == 2:
-                    kind = 0
+                kind = transport_unit[0]
+                kind = kind + 1 if kind + 1 < len(self.available_transport) else 0
 
                 self.canvas.delete(transport_unit[1])
                 index = self.results_transport_units.index(transport_unit)
@@ -409,26 +410,17 @@ class Game:
         if len(self.results_transport_units) == self.max_results_transport_units:
             return
 
-        # ufo
-        kind = 1
-
-        if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-            # rocket
-            kind = 0
-
+        clicked_id = self.canvas.find_withtag('current')[0]
+        clicked_index = self.transport_units_objects.index(clicked_id)
+        kind = self.kinds[self.available_transport[clicked_index]]
         self.append_to_results_transport_unit(kind)
 
     def release_transport_unit(self, event):
         if len(self.results_transport_units) != self.max_results_transport_units:
             current_coords = [event.x, event.y]
-            kind = 1
-
-            if self.canvas.find_withtag("current")[0] == self.transport_units_objects[0]:
-                kind = 0
-
-            if self.canvas.find_withtag("current")[0] == self.transport_units_objects[2]:
-                # tesla
-                kind = 2
+            dragged_id = self.canvas.find_withtag('current')[0]
+            dragged_index = self.transport_units_objects.index(dragged_id)
+            kind = self.kinds[self.available_transport[dragged_index]]
 
             if self.results_rectangle_coords == current_coords or self.results_rectangle_coords[0] + 800 >= \
                     current_coords[
@@ -458,12 +450,11 @@ class Game:
         self.transport_units_objects = []
 
     def create_transport_units(self):
-        self.transport_units_objects.append(
-            self.canvas.create_image(1165, 620, image=self.transport_units["rocket"], tag="movable"))
-        self.transport_units_objects.append(
-            self.canvas.create_image(1170, 655, image=self.transport_units["ufo"], tag="movable"))
-        self.transport_units_objects.append(
-            self.canvas.create_image(1170, 690, image=self.transport_units["tesla"], tag="movable"))
+        coords = [(1165, 620), (1170, 655), (1170, 690)]
+        for i in range(len(self.available_transport)):
+            self.transport_units_objects.append(
+                self.canvas.create_image(*coords[i], image=self.transport_units[self.available_transport[i]],
+                                         tag="movable"))
 
     def remake_transport_units_objects(self):
         self.clean_transport_units_objects()

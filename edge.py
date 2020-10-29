@@ -30,9 +30,6 @@ class Edge:
     def get_transport_type(self):
         return self.image.img_type
 
-    def get_transport_name(self):
-        return 'rocket' if self.get_transport_type() == 0 else 'ufo'
-
     def connected_nodes(self, x1, y1, x2, y2, area):
         return self.start.x - area <= x1 <= self.start.x + area and self.start.y - area <= y1 <= self.start.y + area \
                and self.end.x - area <= x2 <= self.end.x + area and self.end.y - area <= y2 <= self.end.y + area

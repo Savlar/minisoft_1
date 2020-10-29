@@ -15,6 +15,7 @@ class Graph:
 
         for x in range(0,self.max_transport_units):
             self.all_paths[x] = []
+        self.map_transport = set()
         self.path = []
         self.points = []
         self.edges = []
@@ -52,6 +53,9 @@ class Graph:
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
+                for transport in list(filter(None, self.image_names[t].split('_'))):
+                    if transport != 'small':
+                        self.map_transport.add(transport)
                 edge.image.add_image_info(self.canvas.create_image(x, y,
                                                                    image=self.transport_images[self.image_names[t]],
                                                                    tag='graph'), (x, y), t)
