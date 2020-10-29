@@ -164,7 +164,10 @@ class Main:
                                                                 "*.pickle*"),
                                                                ))
         if self.file_name is not None and self.file_name != '' and not isinstance(self.file_name, tuple):
-            self.reset()
+            if self.graph_editor is not None:
+                self.graph_editor.load(load_data(self.file_name))
+            else:
+                self.reset()
 
     def delete_unused_editor_buttons(self):
         self.canvas.delete(self.buttons_id["check"])
@@ -220,8 +223,6 @@ class Main:
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
-            if self.graph_editor is not None:
-                self.graph_editor.close()
             self.browse_file()
 
         elif self.canvas.coords("current") == self.canvas.coords(self.buttons_id["reset"]):

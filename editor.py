@@ -13,7 +13,7 @@ class GraphEditor(Graph):
         self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
         self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
         self.canvas.tag_bind("draw_ground", '<ButtonRelease-1>', self.end_drawing)
-        self.canvas.tag_bind("change_transport_unit", '<Button-1>', self.change_transport_unit)
+        self.canvas.bind('<Button-1>', self.change_transport_unit)
         self.canvas.bind('<Button-2>', self.delete_edge)
         self.canvas.unbind('<Button-3>')
         self.line = None

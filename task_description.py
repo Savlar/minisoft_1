@@ -1,3 +1,4 @@
+import random
 import tkinter
 
 
@@ -40,7 +41,8 @@ class TaskDescription:
         self.canvas.create_text(self.x, 70, text=strings[0], font=("Alfa Slab One",11), tag='description')
         self.canvas.create_image(self.x, 100, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
-            self.canvas.create_image(self.x, 154 + order * 70, image=self.transport_images[item], tag='description')
+            transport_unit = random.choice(list(filter(None, item.split('_'))))
+            self.canvas.create_image(self.x, 154 + order * 70, image=self.transport_images[transport_unit], tag='description')
             self.canvas.create_text(self.x, 130 + order * 70, text=strings[order + 1], font=("Alfa Slab One",11), tag='description')
             order += 1
         self.canvas.create_text(self.x, 50 + (1 + order) * 70, text=strings[-1], font=("Alfa Slab One",11), tag='description')
@@ -53,8 +55,9 @@ class TaskDescription:
         strings.append('Kde sme začali?')
         order = 0
         for item in self.transport:
+            transport_unit = random.choice(list(filter(None, item.split('_'))))
             self.canvas.create_text(self.x, 70 + order * 70, text=strings[order], font=("Alfa Slab One",11), tag='description')
-            self.canvas.create_image(self.x, 100 + order * 70, image=self.transport_images[item], tag='description')
+            self.canvas.create_image(self.x, 100 + order * 70, image=self.transport_images[transport_unit], tag='description')
             order += 1
         self.canvas.create_text(self.x, 70 + order * 70, text=strings[-2], font=("Alfa Slab One",11), tag='description')
         self.canvas.create_image(self.x, 100 + order * 70, image=self.planets_images[self.path[-1]], tag='description')
