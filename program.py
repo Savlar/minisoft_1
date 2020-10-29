@@ -39,7 +39,7 @@ class Main:
                                                                  "saturn", "uranus", "venus"])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small",
-                                                                   "rocket_ufo_tesla_small", 'tesla_small',
+                                                                   "rocket_ufo_tesla_small", 'tesla_small', 'rocket_ufo_small',
                                                                    'ufo_tesla_small', 'rocket_tesla_small', 'tesla'])
 
         self.title_images = self.create_dictionary_for_images("textures/titles/",

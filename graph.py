@@ -8,7 +8,7 @@ class Graph:
     def __init__(self, canvas: tkinter.Canvas, planets_images, transport_images, max_transport_units, mark=False):
         self.canvas = canvas
         self.max_transport_units = max_transport_units
-        self.image_size = 60
+        self.image_size = 45
         self.free = False
         self.vertex_markers = {}
         self.all_paths = {}
@@ -25,6 +25,9 @@ class Graph:
         self.create_vertices()
         self.create_edges()
         self.draw_planets()
+        self.image_names = {0: 'rocket_small', 1: 'ufo_small', 2: 'tesla_small', 3: 'ufo_tesla_small',
+                            4: 'rocket_tesla_small', 5: 'rocket_ufo_small', 6: 'rocket_ufo_tesla_small'}
+        self.canvas.unbind('<Button-1>')
         if mark:
             self.canvas.bind('<Button-1>', self.mark_vertex)
         self.offset_last_point = 5
@@ -47,8 +50,9 @@ class Graph:
             if len(edge.image.image_coords) > 0:
                 t = edge.image.img_type
                 x, y = edge.image.image_coords
-                edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images[
-                    'ufo_small' if t == 1 else 'rocket_small']), (x, y), t)
+                edge.image.add_image_info(self.canvas.create_image(x, y,
+                                                                   image=self.transport_images[self.image_names[t]],
+                                                                   tag='graph'), (x, y), t)
 
     def create_edges(self):
         for vertex in self.vertices:
@@ -57,7 +61,7 @@ class Graph:
                     self.edges.append(Edge(vertex, neighbour))
 
     def find_edge(self, start, end):
-        area = 35
+        area = 20
         for edge in self.edges:
             if edge.connected_nodes(start[0], start[1], end[0], end[1], area):
                 return edge
@@ -72,11 +76,14 @@ class Graph:
                                                                outline='red'), text, order]
 
     def mark_vertex(self, e):
+        previously_marked = None
         if not self.free:
-            self.delete_items(list(x[0] for x in self.vertex_markers.values()))
-            self.vertex_markers = {}
+            previously_marked = list(self.vertex_markers.keys())[0] if len(self.vertex_markers.keys()) > 0 else None
+            self.remove_marker()
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
+                if previously_marked is not None and previously_marked == vertex:
+                    return
                 try:
                     self.delete_items(self.vertex_markers[vertex][0])
                     self.delete_items(self.vertex_markers[vertex][1])
@@ -121,9 +128,11 @@ class Graph:
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
             transport = []
+            names = {0: 'rocket', 1: 'ufo', 2: 'banshee', 3: 'banshee_ufo', 4: 'banshee_rocket',
+                     5: 'banshee_ufo_rocket'}
             for edge in self.path:
                 vertices.append(edge.end.name)
-                transport.append('rocket' if edge.get_transport_type() == 0 else 'ufo')
+                transport.append(names[edge.get_transport_type()])
             self.all_paths[len(transport)].append((vertices, transport))
             return
         else:
@@ -132,3 +141,7 @@ class Graph:
                     self.path.append(edge)
                     self.find_path(edge.end, dest)
                     self.path.pop()
+
+    def remove_marker(self):
+        self.delete_items(list(x[0] for x in self.vertex_markers.values()))
+        self.vertex_markers = {}

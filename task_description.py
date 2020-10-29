@@ -40,10 +40,10 @@ class TaskDescription:
         self.canvas.create_text(self.x, 70, text=strings[0], font=("Alfa Slab One",11), tag='description')
         self.canvas.create_image(self.x, 100, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
-            self.canvas.create_image(self.x, 150 + order * 70, image=self.transport_images[item], tag='description')
-            self.canvas.create_text(self.x, 136 + order * 70, text=strings[order + 1], font=("Alfa Slab One",11), tag='description')
+            self.canvas.create_image(self.x, 154 + order * 70, image=self.transport_images[item], tag='description')
+            self.canvas.create_text(self.x, 130 + order * 70, text=strings[order + 1], font=("Alfa Slab One",11), tag='description')
             order += 1
-        self.canvas.create_text(self.x, 50 + (1 + order) * 48, text=strings[-1], font=("Alfa Slab One",11), tag='description')
+        self.canvas.create_text(self.x, 50 + (1 + order) * 70, text=strings[-1], font=("Alfa Slab One",11), tag='description')
 
     def write_task_4(self):
         strings = ['Išli sme']
