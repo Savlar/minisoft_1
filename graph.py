@@ -130,8 +130,8 @@ class Graph:
         if current == dest and len(self.path) > 0:
             vertices = [self.path[0].start.name]
             transport = []
-            names = {0: 'rocket', 1: 'ufo', 2: 'banshee', 3: 'banshee_ufo', 4: 'banshee_rocket',
-                     5: 'banshee_ufo_rocket'}
+            names = {0: 'rocket', 1: 'ufo', 2: 'tesla', 3: 'ufo_tesla', 4: 'rocket_tesla',
+                     5: 'rocket_ufo', 6: 'rocket_ufo_tesla'}
             for edge in self.path:
                 vertices.append(edge.end.name)
                 transport.append(names[edge.get_transport_type()])
