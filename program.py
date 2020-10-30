@@ -250,12 +250,16 @@ class Main:
             self.check_path()
         elif self.buttons_id["delete"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["delete"]):
+            if self.buttons_id.get('next') is not None:
+                self.canvas.delete(self.buttons_id.get('next'))
+                self.buttons_id['next'] = None
             self.remove_objects_with_tag('title_result')
             self.graph.remove_all_markers()
             if self.game is not None:
                 self.game.remove_selected_objects()
         elif self.buttons_id.get('next') is not None and \
                 self.canvas.coords('current') == self.canvas.coords(self.buttons_id['next']):
+            self.solved_tasks[str(self.random_type)] += 1
             self.canvas.delete(self.buttons_id['next'])
             self.buttons_id.pop('next')
             self.canvas.delete('title_result')
@@ -284,6 +288,10 @@ class Main:
     def create_result_text_image(self, type_result):
         if type_result == 'good_solution':
             self.correct_answer()
+        else:
+            if self.buttons_id.get('next') is not None:
+                self.canvas.delete(self.buttons_id['next'])
+                self.buttons_id['next'] = None
         self.remove_objects_with_tag('title_result')
         self.canvas.create_image(640, 680, image=self.result_solution_images[type_result], tag="title_result")
 
@@ -335,7 +343,6 @@ class Main:
         next_button = self.buttons_id.get('next')
         if next_button is None:
             self.buttons_id['next'] = self.canvas.create_image(850, 675, image=self.buttons_basic_images['next'], tag='button')
-        self.solved_tasks[str(self.random_type)] += 1
 
     def get_results_transport_units(self):
         list_transport_units = []
