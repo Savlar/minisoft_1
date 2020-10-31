@@ -30,7 +30,7 @@ class GraphEditor(Graph):
                 break
 
     def save(self):
-        save_data(self.edges, self.vertices)
+        return save_data(self.edges, self.vertices)
 
     def start_drawing(self, e):
         self.points = [(e.x, e.y)]

@@ -8,6 +8,7 @@ def save_data(edges, vertices):
 
     if file is not None and not isinstance(file, tuple):
         pickle.dump([edges, vertices], file)
+    return file
 
 
 def load_data(file_name):

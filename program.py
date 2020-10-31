@@ -352,7 +352,10 @@ class Main:
         return list_transport_units
 
     def save_map(self):
-        self.graph_editor.save()
+        file_name = self.graph_editor.save().name
+        file_name = 'misc/' + file_name[file_name.rfind('/') + 1:]
+        if file_name is not None:
+            self.file_name = file_name
 
     def clean_main_menu(self):
         self.canvas.delete("all")
