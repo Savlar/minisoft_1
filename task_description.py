@@ -36,7 +36,7 @@ class TaskDescription:
         strings = [self.text_images["start_on_low"], self.text_images["go_caps"]]
         for i in range(len(self.transport) - 1):
             strings.append(self.text_images["and_low"])
-        strings.append(self.text_images["where_caps"])
+        strings.append(self.text_images["where_end_caps"])
         order = 0
         self.canvas.create_image(self.x, 70, image=strings[0], tag="description")
         self.canvas.create_image(self.x, 100, image=self.planets_images[self.path[0]], tag='description')

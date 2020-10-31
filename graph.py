@@ -40,8 +40,9 @@ class Graph:
             self.canvas.create_image(vertex.x, vertex.y, image=self.planets_images[vertex.name], tag="draw_ground")
 
     def create_vertices(self):
-        coords = [(560, 80), (360, 190), (760, 190), (300, 340), (800, 340), (260, 490), (550, 360), (460, 560)]
-        planets = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']
+        coords = [(637, 60), (413, 185), (862, 185), (300, 310), (525, 310), (750, 310), (975, 310), (413, 435),
+                  (862, 435), (637, 560)]
+        planets = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'moon', 'pluto']
         for i in range(len(planets)):
             self.vertices.append(Vertex(*coords[i], planets[i]))
 
@@ -85,10 +86,10 @@ class Graph:
         previously_marked = None
         if not self.free:
             previously_marked = list(self.vertex_markers.keys())[0] if len(self.vertex_markers.keys()) > 0 else None
-            self.remove_marker()
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
                 if previously_marked is not None and previously_marked == vertex:
+                    self.remove_marker()
                     return
                 try:
                     self.delete_items(self.vertex_markers[vertex][0])
@@ -100,6 +101,7 @@ class Graph:
                             self.canvas.itemconfig(marker[1], text=marker[2])
                     self.vertex_markers.pop(vertex)
                 except KeyError:
+                    self.remove_marker()
                     order = len(self.vertex_markers.keys())
                     self.create_marker(vertex, order + 1)
 

@@ -43,7 +43,7 @@ class Main:
 
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
-                                                                 "saturn", "uranus", "venus"])
+                                                                 "saturn", "uranus", "venus", 'moon', 'pluto'])
         self.transport_images = self.create_dictionary_for_images("textures/transportunits/",
                                                                   ["rocket", "ufo", "rocket_small", "ufo_small",
                                                                    "rocket_ufo_tesla_small", 'tesla_small',
@@ -118,7 +118,7 @@ class Main:
         self.canvas.delete('title')
         self.canvas.create_image(1180, 40, image=self.title_images["task"], tag="title")
         if self.random_type < 3:
-            self.canvas.create_image(640, 600, image=self.title_images["path"], tag="title")
+            self.canvas.create_image(380, 600, image=self.title_images["path"], tag="title")
 
     @staticmethod
     def create_dictionary_for_images(path, image_list):
