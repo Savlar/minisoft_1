@@ -66,10 +66,10 @@ class GraphEditor(Graph):
 
     def transport_selection(self, edge):
         coords = self.canvas.coords(edge.line)
-        middle = len(coords) // 2
-        if middle % 2 == 1:
-            middle -= 1
-        x, y = coords[middle], coords[middle + 1]
+        index = len(coords) // 3
+        if index % 2 == 1:
+            index -= 1
+        x, y = coords[index], coords[index + 1]
         edge.image.add_image_info(self.canvas.create_image(x, y, image=self.transport_images['rocket_small'],
                                                            tag="change_transport_unit"), (x, y), 0)
 
@@ -97,8 +97,4 @@ class GraphEditor(Graph):
         self.canvas.unbind('<Button-3>')
 
     def correct_map(self):
-        self.generate_paths()
-        for i in range(2, self.max_transport_units):
-            if len(self.all_paths[i]) > 0:
-                return True
-        return False
+        return self.check_correct_map()

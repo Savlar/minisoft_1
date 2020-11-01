@@ -21,7 +21,7 @@ class Main:
     def __init__(self, canvas: tkinter.Canvas, file_name=None):
         self.canvas = canvas
         self.random_type = random.randint(1, 4)
-        self.max_transport_units = 10
+        self.max_transport_units = 8
         self.background = tkinter.PhotoImage(file="./textures/bg.png")
         self.canvas.create_image(640, 360, image=self.background, tag="background")
         self.msg = self.canvas.create_text(640, 680, text='', font=("Alfa Slab One", 18))
@@ -71,6 +71,8 @@ class Main:
         self.generate_task()
 
     def generate_task(self):
+        self.canvas.delete(self.buttons_id.get('next'))
+        self.canvas.delete('title_result')
         self.graph.remove_all_markers()
         if self.game is not None:
             self.canvas.delete('movable')
@@ -88,7 +90,8 @@ class Main:
         elif type_solutions == 2:
             self.random_length = random.randint(6, 7)
         else:
-            self.random_length = random.randint(8, 9)
+            self.random_length = 8
+        self.random_length = 8
         while True:
             if len(self.graph.all_paths[self.random_length]) == 0:
                 self.random_length -= 1
@@ -129,22 +132,22 @@ class Main:
         return images
 
     def create_buttons(self):
-        y = 50
+        y = 30
         for buttonName in ["load", "editor", "reset", "close"]:
             self.buttons_id[buttonName] = self.canvas.create_image(110, y,
                                                                    image=self.buttons_basic_images[buttonName],
                                                                    tag="button")
             y += 40
-        self.buttons_id["check"] = self.canvas.create_image(1170, 540, image=self.buttons_basic_images["check"],
+        self.buttons_id["check"] = self.canvas.create_image(1170, 640, image=self.buttons_basic_images["check"],
                                                             tag="button")
 
-        self.buttons_id["delete"] = self.canvas.create_image(1170, 580, image=self.buttons_basic_images["delete"],
+        self.buttons_id["delete"] = self.canvas.create_image(1170, 680, image=self.buttons_basic_images["delete"],
                                                              tag="button")
-        self.canvas.create_image(110, 350, image=self.title_images["task_type"], tag="task_types")
+        self.canvas.create_image(110, 270, image=self.title_images["task_type"], tag="task_types")
         for num, task_type_number in enumerate(["1", "2", "3", "4", "5"]):
             image = self.buttons_filled_images[task_type_number] \
                 if task_type_number in self.selected_task_types else self.buttons_basic_images[task_type_number]
-            self.buttons_id[task_type_number] = self.canvas.create_image(110, 380 + num * 35, image=image,
+            self.buttons_id[task_type_number] = self.canvas.create_image(110, 300 + num * 35, image=image,
                                                                          tag="task_types")
 
         self.canvas.update()
@@ -230,6 +233,8 @@ class Main:
             self.graph.delete_all()
             self.task.clear()
             self.delete_unused_editor_buttons()
+            if self.game is not None:
+                self.game.remove_selected_objects()
             self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,
                                             self.max_transport_units)
             self.create_editor_buttons()
@@ -305,17 +310,15 @@ class Main:
                 return
             if self.random_type == 3:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
-                        -1] == selected \
-                            and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
+                    if self.equal_paths(path[1], self.graph.all_paths[self.random_length][self.random_path][1]) and \
+                            path[0][-1] == selected and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.create_result_text_image("good_solution")
                         return
                 self.create_result_text_image("bad_solution")
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
-                    if path[1] == self.graph.all_paths[self.random_length][self.random_path][1] and path[0][
-                        0] == selected \
-                            and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
+                    if self.equal_paths(path[1], self.graph.all_paths[self.random_length][self.random_path][1]) and \
+                            path[0][0] == selected and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.create_result_text_image("good_solution")
                         return
                 self.create_result_text_image("bad_solution")
@@ -352,9 +355,10 @@ class Main:
         return list_transport_units
 
     def save_map(self):
-        file_name = self.graph_editor.save().name
-        file_name = 'misc/' + file_name[file_name.rfind('/') + 1:]
+        file_name = self.graph_editor.save()
+        file_name = file_name.name if file_name is not None else None
         if file_name is not None:
+            file_name = 'misc/' + file_name[file_name.rfind('/') + 1:]
             self.file_name = file_name
 
     def clean_main_menu(self):
@@ -382,8 +386,8 @@ class Game:
         self.movable_units = self.canvas.tag_bind("movable", "<B3-Motion>", self.move_transport_unit)
         self.release_units = self.canvas.tag_bind("movable", "<ButtonRelease-3>", self.release_transport_unit)
         self.click_units = self.canvas.tag_bind("movable", "<Button-1>", self.add_transport_unit_on_click)
-        self.click_units = self.canvas.tag_bind("results_clickable", "<Button-1>", self.remove_transport_unit_on_click)
-        self.click_units = self.canvas.tag_bind("results_clickable", "<Button-3>", self.change_transport_unit_on_click)
+        self.click_units = self.canvas.tag_bind("results_clickable", "<Button-3>", self.remove_transport_unit_on_click)
+        self.click_units = self.canvas.tag_bind("results_clickable", "<Button-1>", self.change_transport_unit_on_click)
         self.create_transport_units()
         self.canvas.update()
 
@@ -460,7 +464,7 @@ class Game:
         self.transport_units_objects = []
 
     def create_transport_units(self):
-        coords = [(1165, 620), (1170, 655), (1170, 690)]
+        coords = [(1010, 620), (1015, 655), (1015, 690)]
         for i in range(len(self.available_transport)):
             self.transport_units_objects.append(
                 self.canvas.create_image(*coords[i], image=self.transport_units[self.available_transport[i]],

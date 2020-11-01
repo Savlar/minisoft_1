@@ -42,11 +42,11 @@ class TaskDescription:
         self.canvas.create_image(self.x, 100, image=self.planets_images[self.path[0]], tag='description')
         for item in self.transport:
             transport_unit = random.choice(list(filter(None, item.split('_'))))
-            self.canvas.create_image(self.x, 154 + order * 70, image=self.transport_images[transport_unit],
+            self.canvas.create_image(self.x, 154 + order * 65, image=self.transport_images[transport_unit],
                                      tag='description')
-            self.canvas.create_image(self.x, 130 + order * 70, image=strings[order + 1], tag="description")
+            self.canvas.create_image(self.x, 130 + order * 65, image=strings[order + 1], tag="description")
             order += 1
-        self.canvas.create_image(self.x, 50 + (1 + order) * 70, image=strings[-1], tag="description")
+        self.canvas.create_image(self.x, 50 + (1 + order) * 65, image=strings[-1], tag="description")
 
     def write_task_4(self):
         strings = [self.text_images["go_caps"]]
@@ -57,14 +57,14 @@ class TaskDescription:
         order = 0
         for item in self.transport:
             transport_unit = random.choice(list(filter(None, item.split('_'))))
-            self.canvas.create_image(self.x, 70 + order * 70, image=strings[order], tag="description")
-            self.canvas.create_image(self.x, 100 + order * 70, image=self.transport_images[transport_unit],
+            self.canvas.create_image(self.x, 70 + order * 65, image=strings[order], tag="description")
+            self.canvas.create_image(self.x, 100 + order * 65, image=self.transport_images[transport_unit],
                                      tag='description')
             order += 1
-        self.canvas.create_image(self.x, 70 + order * 70, image=strings[-2], tag="description")
-        self.canvas.create_image(self.x, 100 + order * 70, image=self.planets_images[self.path[-1]], tag='description')
+        self.canvas.create_image(self.x, 70 + order * 65, image=strings[-2], tag="description")
+        self.canvas.create_image(self.x, 100 + order * 65, image=self.planets_images[self.path[-1]], tag='description')
         order += 1
-        self.canvas.create_image(self.x, 70 + order * 70, image=strings[-1], tag="description")
+        self.canvas.create_image(self.x, 70 + order * 65, image=strings[-1], tag="description")
 
     def clear(self):
         for item in self.canvas.find_withtag('description'):

@@ -13,7 +13,7 @@ class Graph:
         self.vertex_markers = {}
         self.all_paths = {}
 
-        for x in range(0,self.max_transport_units):
+        for x in range(0,self.max_transport_units + 1):
             self.all_paths[x] = []
         self.map_transport = set()
         self.path = []
@@ -68,7 +68,7 @@ class Graph:
                     self.edges.append(Edge(vertex, neighbour))
 
     def find_edge(self, start, end):
-        area = 20
+        area = 30
         for edge in self.edges:
             if edge.connected_nodes(start[0], start[1], end[0], end[1], area):
                 return edge
@@ -88,7 +88,7 @@ class Graph:
             previously_marked = list(self.vertex_markers.keys())[0] if len(self.vertex_markers.keys()) > 0 else None
         for vertex in self.vertices:
             if vertex.clicked(e.x, e.y):
-                if previously_marked is not None and previously_marked == vertex:
+                if previously_marked is not None and previously_marked == vertex and not self.free:
                     self.remove_marker()
                     return
                 try:
@@ -101,7 +101,8 @@ class Graph:
                             self.canvas.itemconfig(marker[1], text=marker[2])
                     self.vertex_markers.pop(vertex)
                 except KeyError:
-                    self.remove_marker()
+                    if not self.free:
+                        self.remove_marker()
                     order = len(self.vertex_markers.keys())
                     self.create_marker(vertex, order + 1)
 
@@ -130,6 +131,19 @@ class Graph:
                 self.path = []
                 self.find_path(source, dest)
 
+    def check_correct_map(self):
+        self.all_paths = {k: [] for k in self.all_paths}
+        self.all_paths[0] = [(['mercury'], []), (['venus'], []), (['earth'], []), (['mars'], []),
+                             (['jupiter'], []), (['saturn'], []), (['uranus'], []), (['neptune'], [])]
+        for source in self.vertices:
+            for dest in self.vertices:
+                self.path = []
+                self.find_path(source, dest)
+                for i in range(1, self.max_transport_units):
+                    if len(self.all_paths[i]) > 0:
+                        return True
+        return False
+
     def find_path(self, current, dest):
         if len(self.path) >= self.max_transport_units:
             return
@@ -142,13 +156,11 @@ class Graph:
                 vertices.append(edge.end.name)
                 transport.append(names[edge.get_transport_type()])
             self.all_paths[len(transport)].append((vertices, transport))
-            return
-        else:
-            for edge in self.edges:
-                if edge.start == current and edge.is_edge():
-                    self.path.append(edge)
-                    self.find_path(edge.end, dest)
-                    self.path.pop()
+        for edge in self.edges:
+            if edge.start == current and edge.is_edge():
+                self.path.append(edge)
+                self.find_path(edge.end, dest)
+                self.path.pop()
 
     def remove_marker(self):
         self.delete_items(list(x[0] for x in self.vertex_markers.values()))
