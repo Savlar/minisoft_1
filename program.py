@@ -180,6 +180,7 @@ class Main:
                                                                ))
         if self.file_name is not None and self.file_name != '' and not isinstance(self.file_name, tuple):
             if self.graph_editor is not None:
+                self.canvas.delete('wrong_map_title')
                 self.graph_editor.load(load_data(self.file_name))
             else:
                 self.reset()
