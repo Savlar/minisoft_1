@@ -7,9 +7,11 @@ from serialize import save_data
 
 class GraphEditor(Graph):
 
-    def __init__(self, canvas, planets_images, transport_images,max_transport_units):
+    def __init__(self, canvas, planets_images, transport_images, max_transport_units, wrong_map_image):
         super(GraphEditor, self).__init__(canvas, planets_images, transport_images, max_transport_units)
         self.saved = False
+        self.wrong_map_image = wrong_map_image
+        self.wrong_map_object = None
         self.canvas.tag_bind("draw_ground", '<Button-1>', self.start_drawing)
         self.canvas.tag_bind("draw_ground", '<B1-Motion>', self.mouse_drag)
         self.canvas.tag_bind("draw_ground", '<ButtonRelease-1>', self.end_drawing)
@@ -33,6 +35,10 @@ class GraphEditor(Graph):
         return save_data(self.edges, self.vertices)
 
     def start_drawing(self, e):
+        if self.wrong_map_object is not None:
+            self.canvas.delete(self.wrong_map_object)
+            self.wrong_map_object = None
+
         self.points = [(e.x, e.y)]
 
     def delete_edge(self, e):
@@ -48,6 +54,11 @@ class GraphEditor(Graph):
             self.line = self.canvas.create_line(points, width=3)
         else:
             self.canvas.coords(self.line, points)
+
+    def create_wrong_map_title(self):
+        if self.wrong_map_object is None:
+            self.wrong_map_object = self.canvas.create_image(680, 640, image=self.wrong_map_image,
+                                                             tag="wrong_map_title")
 
     def end_drawing(self, e):
         copy_points = self.simplify_line(e)

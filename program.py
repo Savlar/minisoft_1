@@ -41,6 +41,8 @@ class Main:
                                                                                 "to_low", "want_caps",
                                                                                 "start_on_low", "where_end_caps"])
 
+        self.wrong_map_image = tkinter.PhotoImage(file="./textures/titles/wrong_map.png")
+
         self.planets_images = self.create_dictionary_for_images("textures/planets/",
                                                                 ["earth", "jupiter", "mars", "mercury", "neptune",
                                                                  "saturn", "uranus", "venus", 'moon', 'pluto'])
@@ -54,7 +56,6 @@ class Main:
                                                               ["path", "task", "task_type", "difficulty"])
 
         self.buttons_id = {}
-
         self.create_buttons()
         self.buttons_bind = self.canvas.bind("<Motion>", self.filled_button)
         self.buttons_action_bind = self.canvas.tag_bind("button", "<Button-1>", self.buttons_action)
@@ -91,7 +92,6 @@ class Main:
             self.random_length = random.randint(6, 7)
         else:
             self.random_length = 8
-        self.random_length = 8
         while True:
             if len(self.graph.all_paths[self.random_length]) == 0:
                 self.random_length -= 1
@@ -236,7 +236,7 @@ class Main:
             if self.game is not None:
                 self.game.remove_selected_objects()
             self.graph_editor = GraphEditor(self.canvas, self.planets_images, self.transport_images,
-                                            self.max_transport_units)
+                                            self.max_transport_units, self.wrong_map_image)
             self.create_editor_buttons()
 
         if self.canvas.coords("current") == self.canvas.coords(self.buttons_id["load"]):
@@ -274,7 +274,7 @@ class Main:
             if self.graph_editor.correct_map():
                 self.save_map()
             else:
-                print('Wrong map')
+                self.graph_editor.create_wrong_map_title()
 
         elif self.buttons_id["back"] is not None and self.canvas.coords("current") == self.canvas.coords(
                 self.buttons_id["back"]):
@@ -311,14 +311,16 @@ class Main:
             if self.random_type == 3:
                 for path in self.graph.all_paths[self.random_length]:
                     if self.equal_paths(path[1], self.graph.all_paths[self.random_length][self.random_path][1]) and \
-                            path[0][-1] == selected and path[0][0] == self.graph.all_paths[self.random_length][self.random_path][0][0]:
+                            path[0][-1] == selected and path[0][0] == \
+                            self.graph.all_paths[self.random_length][self.random_path][0][0]:
                         self.create_result_text_image("good_solution")
                         return
                 self.create_result_text_image("bad_solution")
             if self.random_type == 4:
                 for path in self.graph.all_paths[self.random_length]:
                     if self.equal_paths(path[1], self.graph.all_paths[self.random_length][self.random_path][1]) and \
-                            path[0][0] == selected and path[0][-1] == self.graph.all_paths[self.random_length][self.random_path][0][-1]:
+                            path[0][0] == selected and path[0][-1] == \
+                            self.graph.all_paths[self.random_length][self.random_path][0][-1]:
                         self.create_result_text_image("good_solution")
                         return
                 self.create_result_text_image("bad_solution")
@@ -328,7 +330,8 @@ class Main:
             source = self.graph.all_paths[self.random_length][self.random_path][0][0]
             destination = self.graph.all_paths[self.random_length][self.random_path][0][-1]
             for path in self.graph.all_paths[len(selected_transport)]:
-                if path[0][0] == source and path[0][-1] == destination and self.equal_paths(selected_transport, path[1]):
+                if path[0][0] == source and path[0][-1] == destination and self.equal_paths(selected_transport,
+                                                                                            path[1]):
                     self.create_result_text_image("good_solution")
                     return
             self.create_result_text_image("bad_solution")
@@ -345,7 +348,8 @@ class Main:
     def correct_answer(self):
         next_button = self.buttons_id.get('next')
         if next_button is None:
-            self.buttons_id['next'] = self.canvas.create_image(850, 675, image=self.buttons_basic_images['next'], tag='button')
+            self.buttons_id['next'] = self.canvas.create_image(850, 675, image=self.buttons_basic_images['next'],
+                                                               tag='button')
 
     def get_results_transport_units(self):
         list_transport_units = []
